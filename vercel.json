@@ -6,6 +6,3 @@
     }
   ]
 }
-git add .
-git commit -m "Fix Git author email for Vercel deployment"
-git push
