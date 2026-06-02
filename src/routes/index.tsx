@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { companies, industryOverview, playbookSegments, creditFramework } from "@/data/industryData";
+import { companies, industryOverview, playbookSegments, creditFramework } from "@/data";
 
 export const Route = createFileRoute("/")({
   head: () => ({

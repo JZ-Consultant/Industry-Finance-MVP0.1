@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
-import { companies } from "@/data/industryData";
+import { companies } from "@/data";
 
 export const Route = createFileRoute("/companies/$id")({
   head: ({ params }) => {

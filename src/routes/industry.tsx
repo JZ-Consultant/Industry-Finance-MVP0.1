@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { industryOverview } from "@/data/industryData";
+import { industryOverview } from "@/data";
 
 export const Route = createFileRoute("/industry")({
   head: () => ({

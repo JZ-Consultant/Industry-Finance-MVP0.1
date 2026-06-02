@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { creditFramework } from "@/data/industryData";
+import { creditFramework } from "@/data";
 
 export const Route = createFileRoute("/credit")({
   head: () => ({

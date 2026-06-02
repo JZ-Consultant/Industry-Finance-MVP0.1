@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { companies } from "@/data/industryData";
+import { companies } from "@/data";
 
 export const Route = createFileRoute("/companies/")({
   head: () => ({

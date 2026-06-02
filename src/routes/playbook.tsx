@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { playbookSegments } from "@/data/industryData";
+import { playbookSegments } from "@/data";
 
 export const Route = createFileRoute("/playbook")({
   head: () => ({
