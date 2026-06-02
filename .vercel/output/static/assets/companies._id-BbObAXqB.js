@@ -1,1 +1,0 @@
-import{j as o,L as t}from"./index-CSb2RKtG.js";const n=()=>o.jsxs("div",{className:"px-8 py-10 text-sm text-muted-foreground",children:["未找到企业。",o.jsx(t,{to:"/companies",className:"ml-2 text-[var(--primary)] hover:underline",children:"返回名单"})]});export{n as notFoundComponent};
