@@ -1,12 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { playbookSegments } from "@/data/industryData";
 
 export const Route = createFileRoute("/playbook")({
@@ -15,7 +8,7 @@ export const Route = createFileRoute("/playbook")({
       { title: "客户经理营销手册 · 汽车零部件" },
       {
         name: "description",
-        content: "按细分客群组织的营销话术、产品组合与交叉销售机会。",
+        content: "按客群组织的客群画像、融资需求、营销话术、产品适配与交叉经营机会。",
       },
     ],
   }),
@@ -24,74 +17,87 @@ export const Route = createFileRoute("/playbook")({
 
 function PlaybookPage() {
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-6 py-10">
-      <header className="space-y-2 border-b pb-6">
-        <p className="text-xs uppercase tracking-wider text-muted-foreground">
-          营销手册
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight">
+    <div className="mx-auto max-w-7xl space-y-8 px-8 py-10">
+      <header className="space-y-2 border-b border-border pb-6">
+        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <span className="h-px w-6 bg-[var(--gold)]" />
+          客群经营 · 营销手册
+        </div>
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           客户经理营销手册
         </h1>
-        <p className="text-sm text-muted-foreground">
-          按细分客群组织的客户画像、典型需求、推荐话术、产品组合与交叉销售机会，供客户经理直接调用。
+        <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
+          按细分客群组织客群特征、典型融资需求、营销切入话术、产品适配方案与交叉经营机会，供客户经理在拜访与方案制订环节直接调用。
         </p>
       </header>
 
       <div className="space-y-6">
         {playbookSegments.map((s, idx) => (
-          <Card key={s.segment} className="border-border/70">
-            <CardHeader>
+          <article
+            key={s.segment}
+            className="border border-border bg-card"
+          >
+            <header className="flex items-center justify-between border-b border-border bg-muted/40 px-6 py-3">
               <div className="flex items-center gap-3">
-                <span className="text-xs font-mono text-muted-foreground">
-                  {String(idx + 1).padStart(2, "0")}
+                <span className="font-mono text-[11px] text-muted-foreground">
+                  S-{String(idx + 1).padStart(2, "0")}
                 </span>
-                <CardTitle className="text-lg">{s.segment}</CardTitle>
+                <h2 className="text-base font-semibold tracking-tight text-foreground">
+                  {s.segment}
+                </h2>
               </div>
-            </CardHeader>
-            <CardContent className="grid gap-6 md:grid-cols-2">
+              <span className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                客群经营方案
+              </span>
+            </header>
+
+            <div className="grid gap-px bg-border md:grid-cols-2">
               <Block label="客群特征">
-                <p className="text-sm leading-relaxed text-muted-foreground">
+                <p className="text-sm leading-relaxed text-foreground/90">
                   {s.profile}
                 </p>
               </Block>
 
               <Block label="典型融资需求">
-                <div className="flex flex-wrap gap-1.5">
+                <ul className="space-y-1.5">
                   {s.needs.map((n) => (
-                    <Badge key={n} variant="secondary" className="font-normal">
+                    <li key={n} className="flex items-start gap-2 text-sm text-foreground">
+                      <span className="mt-1.5 h-1 w-1 shrink-0 bg-[var(--gold)]" />
                       {n}
-                    </Badge>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </Block>
 
               <Block label="客户经理营销话术">
-                <blockquote className="rounded-md border-l-2 border-primary bg-muted/40 px-4 py-3 text-sm italic leading-relaxed text-foreground">
-                  “{s.pitch}”
+                <blockquote className="border-l-2 border-[var(--gold)] bg-muted/40 px-4 py-3 text-sm leading-relaxed text-foreground">
+                  {s.pitch}
                 </blockquote>
               </Block>
 
-              <Block label="推荐产品组合">
-                <div className="flex flex-wrap gap-1.5">
+              <Block label="推荐产品适配">
+                <ul className="space-y-1.5">
                   {s.products.map((p) => (
-                    <Badge key={p} className="font-normal">
+                    <li key={p} className="flex items-start gap-2 text-sm text-foreground">
+                      <span className="mt-1.5 h-1 w-1 shrink-0 bg-[var(--primary)]" />
                       {p}
-                    </Badge>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </Block>
 
-              <Block label="交叉销售机会">
-                <div className="flex flex-wrap gap-1.5">
+              <Block label="交叉经营机会" full>
+                <ul className="grid gap-1.5 sm:grid-cols-3">
                   {s.crossSell.map((c) => (
-                    <Badge key={c} variant="outline" className="font-normal">
+                    <li key={c} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <span className="mt-1.5 h-1 w-1 shrink-0 bg-muted-foreground" />
                       {c}
-                    </Badge>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </Block>
-            </CardContent>
-          </Card>
+            </div>
+          </article>
         ))}
       </div>
     </div>
@@ -101,13 +107,15 @@ function PlaybookPage() {
 function Block({
   label,
   children,
+  full,
 }: {
   label: string;
   children: React.ReactNode;
+  full?: boolean;
 }) {
   return (
-    <div className="space-y-2">
-      <div className="text-xs uppercase tracking-wider text-muted-foreground">
+    <div className={`space-y-2 bg-card p-5 ${full ? "md:col-span-2" : ""}`}>
+      <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
         {label}
       </div>
       {children}
