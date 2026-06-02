@@ -39,27 +39,45 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b">
-        <div className="px-2 py-3">
-          <div className="text-sm font-semibold tracking-tight">产业金融</div>
-          <div className="text-xs text-muted-foreground">知识资产工作台</div>
+      <SidebarHeader className="border-b border-sidebar-border">
+        <div className="flex items-center gap-2 px-2 py-3">
+          <div className="h-6 w-1 bg-[var(--gold)]" />
+          <div>
+            <div className="text-sm font-semibold tracking-tight text-sidebar-foreground">
+              产业金融
+            </div>
+            <div className="text-[11px] text-sidebar-foreground/60">
+              知识资产工作台
+            </div>
+          </div>
         </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>工作台</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.14em] text-sidebar-foreground/50">
+            模块导航
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {items.map((item) => {
+                const active = isActive(item.url);
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={active}>
+                      <Link
+                        to={item.url}
+                        className="relative flex items-center gap-2 rounded-none"
+                      >
+                        {active && (
+                          <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 bg-[var(--gold)]" />
+                        )}
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

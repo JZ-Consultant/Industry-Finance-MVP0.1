@@ -117,10 +117,14 @@ function RootComponent() {
         <div className="flex min-h-screen w-full bg-background">
           <AppSidebar />
           <div className="flex flex-1 flex-col">
-            <header className="flex h-12 items-center gap-2 border-b bg-background px-3">
-              <SidebarTrigger />
-              <div className="text-sm font-medium text-muted-foreground">
-                产业金融知识资产工作台
+            <header className="flex h-12 items-center gap-3 border-b border-border bg-card px-4">
+              <SidebarTrigger className="text-muted-foreground" />
+              <div className="h-4 w-px bg-border" />
+              <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                Industrial Finance Workbench
+              </div>
+              <div className="ml-auto text-xs text-muted-foreground">
+                示例行业 · 汽车零部件
               </div>
             </header>
             <main className="flex-1">
