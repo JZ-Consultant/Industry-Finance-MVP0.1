@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
 import {
@@ -16,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { companies } from "@/data";
+import { getCompanies } from "@/services/companyService";
 
 export const Route = createFileRoute("/companies/")({
   head: () => ({
@@ -53,8 +54,23 @@ function CompaniesPage() {
   const [segment, setSegment] = useState<string>(ALL);
   const [priority, setPriority] = useState<string>(ALL);
 
-  const cities = Array.from(new Set(companies.map((c) => c.city)));
-  const segments = Array.from(new Set(companies.map((c) => c.segment)));
+  const { data, isLoading } = useQuery({
+    queryKey: ["companies"],
+    queryFn: getCompanies,
+  });
+
+  const companies = data?.companies ?? [];
+  const loadFailed = data?.loadFailed ?? false;
+  const errorMessage = data?.errorMessage;
+
+  const cities = useMemo(
+    () => Array.from(new Set(companies.map((c) => c.city).filter(Boolean))),
+    [companies],
+  );
+  const segments = useMemo(
+    () => Array.from(new Set(companies.map((c) => c.segment).filter(Boolean))),
+    [companies],
+  );
   const priorities = ["高", "中", "低"];
 
   const filtered = useMemo(
@@ -65,7 +81,7 @@ function CompaniesPage() {
           (segment === ALL || c.segment === segment) &&
           (priority === ALL || c.priority === priority),
       ),
-    [city, segment, priority],
+    [companies, city, segment, priority],
   );
 
   return (
@@ -83,10 +99,23 @@ function CompaniesPage() {
         </p>
       </header>
 
+      {isLoading && (
+        <div className="rounded-sm border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+          正在加载企业数据...
+        </div>
+      )}
+
+      {!isLoading && loadFailed && (
+        <div className="rounded-sm border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          企业数据加载失败，请稍后重试
+          {errorMessage ? `：${errorMessage}` : ""}
+        </div>
+      )}
+
       <div className="flex flex-wrap items-end gap-3">
-        <FilterSelect label="城市" value={city} onChange={setCity} options={cities} />
-        <FilterSelect label="细分赛道" value={segment} onChange={setSegment} options={segments} />
-        <FilterSelect label="营销优先级" value={priority} onChange={setPriority} options={priorities} />
+        <FilterSelect label="城市" value={city} onChange={setCity} options={cities} disabled={isLoading} />
+        <FilterSelect label="细分赛道" value={segment} onChange={setSegment} options={segments} disabled={isLoading} />
+        <FilterSelect label="营销优先级" value={priority} onChange={setPriority} options={priorities} disabled={isLoading} />
         <div className="ml-auto self-end text-xs text-muted-foreground">
           已筛选 <span className="font-semibold text-foreground">{filtered.length}</span> / {companies.length} 家
         </div>
@@ -106,34 +135,42 @@ function CompaniesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((c) => (
-              <TableRow key={c.id} className="border-b border-border/70 hover:bg-muted/30">
-                <TableCell className="px-4 py-4 align-top">
-                  <Link
-                    to="/companies/$id"
-                    params={{ id: c.id }}
-                    className="font-medium text-foreground hover:text-[var(--primary)] hover:underline"
-                  >
-                    {c.name}
-                  </Link>
-                </TableCell>
-                <TableCell className="px-4 py-4 align-top text-sm text-foreground">{c.city}</TableCell>
-                <TableCell className="px-4 py-4 align-top text-sm text-foreground">{c.segment}</TableCell>
-                <TableCell className="max-w-[220px] px-4 py-4 align-top text-sm text-muted-foreground">
-                  {c.products}
-                </TableCell>
-                <TableCell className="px-4 py-4 align-top">
-                  <PriorityTag p={c.priority} />
-                </TableCell>
-                <TableCell className="max-w-[240px] px-4 py-4 align-top text-sm text-foreground/90">
-                  {c.opportunity}
-                </TableCell>
-                <TableCell className="max-w-[240px] px-4 py-4 align-top text-sm text-muted-foreground">
-                  {c.risk}
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={7} className="py-12 text-center text-sm text-muted-foreground">
+                  正在加载企业数据...
                 </TableCell>
               </TableRow>
-            ))}
-            {filtered.length === 0 && (
+            )}
+            {!isLoading &&
+              filtered.map((c) => (
+                <TableRow key={c.id} className="border-b border-border/70 hover:bg-muted/30">
+                  <TableCell className="px-4 py-4 align-top">
+                    <Link
+                      to="/companies/$id"
+                      params={{ id: c.id }}
+                      className="font-medium text-foreground hover:text-[var(--primary)] hover:underline"
+                    >
+                      {c.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell className="px-4 py-4 align-top text-sm text-foreground">{c.city}</TableCell>
+                  <TableCell className="px-4 py-4 align-top text-sm text-foreground">{c.segment}</TableCell>
+                  <TableCell className="max-w-[220px] px-4 py-4 align-top text-sm text-muted-foreground">
+                    {c.products}
+                  </TableCell>
+                  <TableCell className="px-4 py-4 align-top">
+                    <PriorityTag p={c.priority} />
+                  </TableCell>
+                  <TableCell className="max-w-[240px] px-4 py-4 align-top text-sm text-foreground/90">
+                    {c.opportunity}
+                  </TableCell>
+                  <TableCell className="max-w-[240px] px-4 py-4 align-top text-sm text-muted-foreground">
+                    {c.risk}
+                  </TableCell>
+                </TableRow>
+              ))}
+            {!isLoading && filtered.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="py-12 text-center text-sm text-muted-foreground">
                   当前筛选条件下暂无目标企业
@@ -152,18 +189,20 @@ function FilterSelect({
   value,
   onChange,
   options,
+  disabled,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: string[];
+  disabled?: boolean;
 }) {
   return (
     <div className="space-y-1.5">
       <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
         {label}
       </div>
-      <Select value={value} onValueChange={onChange}>
+      <Select value={value} onValueChange={onChange} disabled={disabled}>
         <SelectTrigger className="w-44 rounded-sm">
           <SelectValue />
         </SelectTrigger>

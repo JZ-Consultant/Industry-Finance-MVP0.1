@@ -1,23 +1,25 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
-import { companies } from "@/data";
+import { getCompanyById } from "@/services/companyService";
 
 export const Route = createFileRoute("/companies/$id")({
-  head: ({ params }) => {
-    const c = companies.find((x) => x.id === params.id);
-    return {
-      meta: [
-        { title: `${c?.name ?? "企业详情"} · 工作台` },
-        { name: "description", content: c?.intro ?? "企业详情页" },
-      ],
-    };
+  head: ({ loaderData }) => ({
+    meta: [
+      { title: `${loaderData?.company?.name ?? "企业详情"} · 工作台` },
+      { name: "description", content: loaderData?.company?.intro ?? "企业详情页" },
+    ],
+  }),
+  loader: async ({ params }) => {
+    const result = await getCompanyById(params.id);
+    if (!result.company) throw notFound();
+    return result;
   },
-  loader: ({ params }) => {
-    const company = companies.find((c) => c.id === params.id);
-    if (!company) throw notFound();
-    return { company };
-  },
+  pendingComponent: () => (
+    <div className="px-8 py-10 text-sm text-muted-foreground">
+      正在加载企业数据...
+    </div>
+  ),
   notFoundComponent: () => (
     <div className="px-8 py-10 text-sm text-muted-foreground">
       未找到企业。
@@ -79,7 +81,7 @@ function priorityLabel(p: string) {
 }
 
 function CompanyDetail() {
-  const { company } = Route.useLoaderData();
+  const { company, loadFailed, errorMessage } = Route.useLoaderData();
   const pri = priorityLabel(company.priority);
 
   return (
@@ -90,6 +92,13 @@ function CompanyDetail() {
       >
         <ArrowLeft className="h-3.5 w-3.5" /> 返回目标企业名单
       </Link>
+
+      {loadFailed && (
+        <div className="rounded-sm border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          企业数据加载失败，请稍后重试
+          {errorMessage ? `：${errorMessage}` : ""}
+        </div>
+      )}
 
       <header className="space-y-3 border-b border-border pb-6">
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
