@@ -1,12 +1,4 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  LayoutDashboard,
-  BookOpen,
-  Building2,
-  Megaphone,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
 
 import {
   Sidebar,
@@ -19,15 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-
-const items = [
-  { title: "首页", url: "/", icon: LayoutDashboard },
-  { title: "行业概览", url: "/industry", icon: BookOpen },
-  { title: "目标企业名单", url: "/companies", icon: Building2 },
-  { title: "营销手册", url: "/playbook", icon: Megaphone },
-  { title: "信审框架", url: "/credit", icon: ShieldCheck },
-  { title: "AI 助手", url: "/assistant", icon: Sparkles },
-];
+import { WORKBENCH_MODULES } from "@/config/workbenchModules";
 
 export function AppSidebar() {
   const currentPath = useRouterState({
@@ -47,7 +31,7 @@ export function AppSidebar() {
               产业金融
             </div>
             <div className="text-[11px] text-sidebar-foreground/60">
-              知识资产工作台
+              4C 知识资产工作台
             </div>
           </div>
         </div>
@@ -59,10 +43,10 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => {
+              {WORKBENCH_MODULES.map((item) => {
                 const active = isActive(item.url);
                 return (
-                  <SidebarMenuItem key={item.title}>
+                  <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton asChild isActive={active}>
                       <Link
                         to={item.url}
@@ -71,8 +55,8 @@ export function AppSidebar() {
                         {active && (
                           <span className="absolute left-0 top-1/2 h-5 w-[2px] -translate-y-1/2 bg-[var(--gold)]" />
                         )}
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
+                        <item.icon className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

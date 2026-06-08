@@ -79,11 +79,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "产业金融知识资产工作台" },
+      { title: "产业金融“4C”知识资产工作台" },
       {
         name: "description",
         content:
-          "面向商业银行客户经理的行业研究、目标客户筛选、营销策略与信审评估智能工作台",
+          "面向商业银行产业金融经营的知识资产门户，覆盖产业认知、客群经营、信审风控与一线赋能。",
       },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
@@ -124,7 +124,7 @@ function RootComponent() {
                 Industrial Finance Workbench
               </div>
               <div className="ml-auto text-xs text-muted-foreground">
-                示例行业 · 汽车零部件
+                v0.3 · 4C 知识资产门户
               </div>
             </header>
             <main className="flex-1">

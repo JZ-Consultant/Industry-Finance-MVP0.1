@@ -9,22 +9,82 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TrainingRouteImport } from './routes/training'
+import { Route as RegionalStrategyRouteImport } from './routes/regional-strategy'
 import { Route as PlaybookRouteImport } from './routes/playbook'
+import { Route as PeerSuccessCasesRouteImport } from './routes/peer-success-cases'
+import { Route as KeyAccountTemplatesRouteImport } from './routes/key-account-templates'
+import { Route as IndustrySolutionsRouteImport } from './routes/industry-solutions'
+import { Route as IndustryOverviewRouteImport } from './routes/industry-overview'
 import { Route as IndustryRouteImport } from './routes/industry'
+import { Route as DueDiligenceTemplatesRouteImport } from './routes/due-diligence-templates'
+import { Route as DueDiligenceCasesRouteImport } from './routes/due-diligence-cases'
+import { Route as CustomerMarketingGuideRouteImport } from './routes/customer-marketing-guide'
+import { Route as CreditStandardsRouteImport } from './routes/credit-standards'
 import { Route as CreditRouteImport } from './routes/credit'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CompaniesIndexRouteImport } from './routes/companies.index'
 import { Route as CompaniesIdRouteImport } from './routes/companies.$id'
 
+const TrainingRoute = TrainingRouteImport.update({
+  id: '/training',
+  path: '/training',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegionalStrategyRoute = RegionalStrategyRouteImport.update({
+  id: '/regional-strategy',
+  path: '/regional-strategy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlaybookRoute = PlaybookRouteImport.update({
   id: '/playbook',
   path: '/playbook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PeerSuccessCasesRoute = PeerSuccessCasesRouteImport.update({
+  id: '/peer-success-cases',
+  path: '/peer-success-cases',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KeyAccountTemplatesRoute = KeyAccountTemplatesRouteImport.update({
+  id: '/key-account-templates',
+  path: '/key-account-templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndustrySolutionsRoute = IndustrySolutionsRouteImport.update({
+  id: '/industry-solutions',
+  path: '/industry-solutions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndustryOverviewRoute = IndustryOverviewRouteImport.update({
+  id: '/industry-overview',
+  path: '/industry-overview',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndustryRoute = IndustryRouteImport.update({
   id: '/industry',
   path: '/industry',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DueDiligenceTemplatesRoute = DueDiligenceTemplatesRouteImport.update({
+  id: '/due-diligence-templates',
+  path: '/due-diligence-templates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DueDiligenceCasesRoute = DueDiligenceCasesRouteImport.update({
+  id: '/due-diligence-cases',
+  path: '/due-diligence-cases',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CustomerMarketingGuideRoute = CustomerMarketingGuideRouteImport.update({
+  id: '/customer-marketing-guide',
+  path: '/customer-marketing-guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreditStandardsRoute = CreditStandardsRouteImport.update({
+  id: '/credit-standards',
+  path: '/credit-standards',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CreditRoute = CreditRouteImport.update({
@@ -57,8 +117,18 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/credit': typeof CreditRoute
+  '/credit-standards': typeof CreditStandardsRoute
+  '/customer-marketing-guide': typeof CustomerMarketingGuideRoute
+  '/due-diligence-cases': typeof DueDiligenceCasesRoute
+  '/due-diligence-templates': typeof DueDiligenceTemplatesRoute
   '/industry': typeof IndustryRoute
+  '/industry-overview': typeof IndustryOverviewRoute
+  '/industry-solutions': typeof IndustrySolutionsRoute
+  '/key-account-templates': typeof KeyAccountTemplatesRoute
+  '/peer-success-cases': typeof PeerSuccessCasesRoute
   '/playbook': typeof PlaybookRoute
+  '/regional-strategy': typeof RegionalStrategyRoute
+  '/training': typeof TrainingRoute
   '/companies/$id': typeof CompaniesIdRoute
   '/companies/': typeof CompaniesIndexRoute
 }
@@ -66,8 +136,18 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/credit': typeof CreditRoute
+  '/credit-standards': typeof CreditStandardsRoute
+  '/customer-marketing-guide': typeof CustomerMarketingGuideRoute
+  '/due-diligence-cases': typeof DueDiligenceCasesRoute
+  '/due-diligence-templates': typeof DueDiligenceTemplatesRoute
   '/industry': typeof IndustryRoute
+  '/industry-overview': typeof IndustryOverviewRoute
+  '/industry-solutions': typeof IndustrySolutionsRoute
+  '/key-account-templates': typeof KeyAccountTemplatesRoute
+  '/peer-success-cases': typeof PeerSuccessCasesRoute
   '/playbook': typeof PlaybookRoute
+  '/regional-strategy': typeof RegionalStrategyRoute
+  '/training': typeof TrainingRoute
   '/companies/$id': typeof CompaniesIdRoute
   '/companies': typeof CompaniesIndexRoute
 }
@@ -76,8 +156,18 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/credit': typeof CreditRoute
+  '/credit-standards': typeof CreditStandardsRoute
+  '/customer-marketing-guide': typeof CustomerMarketingGuideRoute
+  '/due-diligence-cases': typeof DueDiligenceCasesRoute
+  '/due-diligence-templates': typeof DueDiligenceTemplatesRoute
   '/industry': typeof IndustryRoute
+  '/industry-overview': typeof IndustryOverviewRoute
+  '/industry-solutions': typeof IndustrySolutionsRoute
+  '/key-account-templates': typeof KeyAccountTemplatesRoute
+  '/peer-success-cases': typeof PeerSuccessCasesRoute
   '/playbook': typeof PlaybookRoute
+  '/regional-strategy': typeof RegionalStrategyRoute
+  '/training': typeof TrainingRoute
   '/companies/$id': typeof CompaniesIdRoute
   '/companies/': typeof CompaniesIndexRoute
 }
@@ -87,8 +177,18 @@ export interface FileRouteTypes {
     | '/'
     | '/assistant'
     | '/credit'
+    | '/credit-standards'
+    | '/customer-marketing-guide'
+    | '/due-diligence-cases'
+    | '/due-diligence-templates'
     | '/industry'
+    | '/industry-overview'
+    | '/industry-solutions'
+    | '/key-account-templates'
+    | '/peer-success-cases'
     | '/playbook'
+    | '/regional-strategy'
+    | '/training'
     | '/companies/$id'
     | '/companies/'
   fileRoutesByTo: FileRoutesByTo
@@ -96,8 +196,18 @@ export interface FileRouteTypes {
     | '/'
     | '/assistant'
     | '/credit'
+    | '/credit-standards'
+    | '/customer-marketing-guide'
+    | '/due-diligence-cases'
+    | '/due-diligence-templates'
     | '/industry'
+    | '/industry-overview'
+    | '/industry-solutions'
+    | '/key-account-templates'
+    | '/peer-success-cases'
     | '/playbook'
+    | '/regional-strategy'
+    | '/training'
     | '/companies/$id'
     | '/companies'
   id:
@@ -105,8 +215,18 @@ export interface FileRouteTypes {
     | '/'
     | '/assistant'
     | '/credit'
+    | '/credit-standards'
+    | '/customer-marketing-guide'
+    | '/due-diligence-cases'
+    | '/due-diligence-templates'
     | '/industry'
+    | '/industry-overview'
+    | '/industry-solutions'
+    | '/key-account-templates'
+    | '/peer-success-cases'
     | '/playbook'
+    | '/regional-strategy'
+    | '/training'
     | '/companies/$id'
     | '/companies/'
   fileRoutesById: FileRoutesById
@@ -115,14 +235,38 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssistantRoute: typeof AssistantRoute
   CreditRoute: typeof CreditRoute
+  CreditStandardsRoute: typeof CreditStandardsRoute
+  CustomerMarketingGuideRoute: typeof CustomerMarketingGuideRoute
+  DueDiligenceCasesRoute: typeof DueDiligenceCasesRoute
+  DueDiligenceTemplatesRoute: typeof DueDiligenceTemplatesRoute
   IndustryRoute: typeof IndustryRoute
+  IndustryOverviewRoute: typeof IndustryOverviewRoute
+  IndustrySolutionsRoute: typeof IndustrySolutionsRoute
+  KeyAccountTemplatesRoute: typeof KeyAccountTemplatesRoute
+  PeerSuccessCasesRoute: typeof PeerSuccessCasesRoute
   PlaybookRoute: typeof PlaybookRoute
+  RegionalStrategyRoute: typeof RegionalStrategyRoute
+  TrainingRoute: typeof TrainingRoute
   CompaniesIdRoute: typeof CompaniesIdRoute
   CompaniesIndexRoute: typeof CompaniesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/training': {
+      id: '/training'
+      path: '/training'
+      fullPath: '/training'
+      preLoaderRoute: typeof TrainingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/regional-strategy': {
+      id: '/regional-strategy'
+      path: '/regional-strategy'
+      fullPath: '/regional-strategy'
+      preLoaderRoute: typeof RegionalStrategyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/playbook': {
       id: '/playbook'
       path: '/playbook'
@@ -130,11 +274,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlaybookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/peer-success-cases': {
+      id: '/peer-success-cases'
+      path: '/peer-success-cases'
+      fullPath: '/peer-success-cases'
+      preLoaderRoute: typeof PeerSuccessCasesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/key-account-templates': {
+      id: '/key-account-templates'
+      path: '/key-account-templates'
+      fullPath: '/key-account-templates'
+      preLoaderRoute: typeof KeyAccountTemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/industry-solutions': {
+      id: '/industry-solutions'
+      path: '/industry-solutions'
+      fullPath: '/industry-solutions'
+      preLoaderRoute: typeof IndustrySolutionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/industry-overview': {
+      id: '/industry-overview'
+      path: '/industry-overview'
+      fullPath: '/industry-overview'
+      preLoaderRoute: typeof IndustryOverviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/industry': {
       id: '/industry'
       path: '/industry'
       fullPath: '/industry'
       preLoaderRoute: typeof IndustryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/due-diligence-templates': {
+      id: '/due-diligence-templates'
+      path: '/due-diligence-templates'
+      fullPath: '/due-diligence-templates'
+      preLoaderRoute: typeof DueDiligenceTemplatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/due-diligence-cases': {
+      id: '/due-diligence-cases'
+      path: '/due-diligence-cases'
+      fullPath: '/due-diligence-cases'
+      preLoaderRoute: typeof DueDiligenceCasesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/customer-marketing-guide': {
+      id: '/customer-marketing-guide'
+      path: '/customer-marketing-guide'
+      fullPath: '/customer-marketing-guide'
+      preLoaderRoute: typeof CustomerMarketingGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/credit-standards': {
+      id: '/credit-standards'
+      path: '/credit-standards'
+      fullPath: '/credit-standards'
+      preLoaderRoute: typeof CreditStandardsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/credit': {
@@ -179,8 +379,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssistantRoute: AssistantRoute,
   CreditRoute: CreditRoute,
+  CreditStandardsRoute: CreditStandardsRoute,
+  CustomerMarketingGuideRoute: CustomerMarketingGuideRoute,
+  DueDiligenceCasesRoute: DueDiligenceCasesRoute,
+  DueDiligenceTemplatesRoute: DueDiligenceTemplatesRoute,
   IndustryRoute: IndustryRoute,
+  IndustryOverviewRoute: IndustryOverviewRoute,
+  IndustrySolutionsRoute: IndustrySolutionsRoute,
+  KeyAccountTemplatesRoute: KeyAccountTemplatesRoute,
+  PeerSuccessCasesRoute: PeerSuccessCasesRoute,
   PlaybookRoute: PlaybookRoute,
+  RegionalStrategyRoute: RegionalStrategyRoute,
+  TrainingRoute: TrainingRoute,
   CompaniesIdRoute: CompaniesIdRoute,
   CompaniesIndexRoute: CompaniesIndexRoute,
 }

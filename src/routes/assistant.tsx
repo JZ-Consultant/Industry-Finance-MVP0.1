@@ -4,14 +4,20 @@ import { Send } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { BuildingStatusBanner } from "@/components/workbench/ModuleStatusBadge";
+import { FutureStructureCards } from "@/components/workbench/FutureStructureCards";
+import { ModulePageHeader } from "@/components/workbench/ModulePageHeader";
+import { getModuleById } from "@/config/workbenchModules";
+
+const moduleDef = getModuleById("assistant")!;
 
 export const Route = createFileRoute("/assistant")({
   head: () => ({
     meta: [
-      { title: "AI 助手 · 产业金融工作台" },
+      { title: "产业金融AI助手 · 产业金融知识资产工作台" },
       {
         name: "description",
-        content: "基于产业金融知识资产的智能问答助手（演示版）。",
+        content: moduleDef.description,
       },
     ],
   }),
@@ -19,9 +25,9 @@ export const Route = createFileRoute("/assistant")({
 });
 
 const examples = [
-  "汽车热管理企业的信审关注点是什么？",
-  "客户经理拜访智能座舱企业应该问哪些问题？",
-  "如何判断一家汽车电子企业是否适合重点营销？",
+  "请为某动力电池企业生成客户画像与拜访提纲。",
+  "结合信审评估标准，列出该企业的授信关注点。",
+  "基于客群营销指引，输出一份综合金融方案建议。",
 ];
 
 function AssistantPage() {
@@ -35,18 +41,22 @@ function AssistantPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-8 py-10">
-      <header className="space-y-2 border-b border-border pb-6">
-        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-          <span className="h-px w-6 bg-[var(--gold)]" />
-          知识资产 · 智能问答
+      <ModulePageHeader
+        eyebrow={moduleDef.eyebrow}
+        title="产业金融AI助手"
+        subtitle="基于目标企业名单、客群营销指引、信审评估标准、企业尽调模板与领先同业成功案例等知识资产，生成客户画像、拜访提纲、授信关注点和综合金融方案。"
+      />
+
+      <BuildingStatusBanner />
+
+      <section className="space-y-4">
+        <div className="border-b border-border pb-2">
+          <h2 className="text-sm font-semibold tracking-tight text-foreground">
+            联动能力（规划中）
+          </h2>
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          产业金融 AI 助手
-        </h1>
-        <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
-          基于本工作台沉淀的产业研究、目标客群、营销手册与信审框架构建的智能问答能力，辅助客户经理与审批人员形成经营策略闭环（演示占位）。
-        </p>
-      </header>
+        <FutureStructureCards items={moduleDef.futureStructure} />
+      </section>
 
       <div className="border border-border bg-card">
         <div className="border-b border-border bg-muted/40 px-5 py-2.5 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -56,7 +66,7 @@ function AssistantPage() {
           <Textarea
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            placeholder="请输入你想了解的产业金融问题，例如：这类企业适合推荐哪些银行产品？"
+            placeholder="请输入产业金融相关问题，例如：请结合该企业所属客群输出拜访提纲与授信关注点。"
             className="min-h-[110px] resize-none rounded-sm border-border shadow-none focus-visible:ring-1"
           />
           <div className="flex justify-end">
@@ -71,14 +81,14 @@ function AssistantPage() {
         <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
           示例问题
         </div>
-        <div className="grid gap-px bg-border md:grid-cols-3">
-          {examples.map((e) => (
+        <div className="grid gap-3 md:grid-cols-3">
+          {examples.map((example) => (
             <button
-              key={e}
-              onClick={() => setQuestion(e)}
-              className="bg-card p-4 text-left text-sm leading-relaxed text-foreground transition-colors hover:bg-muted/40"
+              key={example}
+              onClick={() => setQuestion(example)}
+              className="rounded-sm border border-border bg-card p-4 text-left text-sm leading-relaxed text-foreground transition-colors hover:bg-muted/40"
             >
-              {e}
+              {example}
             </button>
           ))}
         </div>
@@ -88,7 +98,7 @@ function AssistantPage() {
         <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
           模拟回答
         </div>
-        <div className="border border-dashed border-border bg-muted/20 p-5">
+        <div className="rounded-sm border border-dashed border-border bg-muted/20 p-5">
           {submitted ? (
             <div className="space-y-3">
               <p className="text-sm text-foreground">
@@ -96,12 +106,13 @@ function AssistantPage() {
                 {submitted}
               </p>
               <p className="text-sm leading-relaxed text-muted-foreground">
-                后续将接入基于知识资产的 AI 问答能力，结合产业研究、目标客群、营销手册与信审框架，为客户经理与审批人员生成结构化的产业链机会判断、营销切入建议与风险识别要点。
+                后续将接入 AI
+                问答能力，联动目标企业名单、客群营销指引、信审评估标准、企业尽调模板与同业成功案例，为客户经理与审批人员生成结构化的客户画像、拜访提纲、授信关注点和综合金融方案。
               </p>
             </div>
           ) : (
             <p className="text-sm leading-relaxed text-muted-foreground">
-              后续将接入基于知识资产的 AI 问答能力。请在上方输入问题或点击示例问题进行体验。
+              演示占位：请在上方输入问题或点击示例问题体验交互流程。
             </p>
           )}
         </div>
