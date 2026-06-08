@@ -2,8 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
-  Table,
   TableBody,
   TableCell,
   TableHead,
@@ -17,15 +18,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  displayValue,
+  formatListedStatus,
+  formatLocation,
+  getListQualificationTags,
+  isYes,
+  uniqueFilterOptions,
+} from "@/lib/companyDisplay";
 import { getCompanies } from "@/services/companyService";
 
 export const Route = createFileRoute("/companies/")({
   head: () => ({
     meta: [
-      { title: "目标企业名单 · 汽车零部件" },
+      { title: "目标企业名单 · 产业金融知识资产工作台" },
       {
         name: "description",
-        content: "汽车零部件行业目标企业名单，支持城市、赛道与优先级筛选。",
+        content:
+          "基于客群分类、企业资质、授信潜力与竞争力标签，辅助客户经理识别重点营销对象。",
       },
     ],
   }),
@@ -34,25 +44,50 @@ export const Route = createFileRoute("/companies/")({
 
 const ALL = "__all__";
 
-function PriorityTag({ p }: { p: string }) {
-  const map: Record<string, { dot: string; text: string; label: string }> = {
-    高: { dot: "bg-[var(--gold)]", text: "text-foreground", label: "高" },
-    中: { dot: "bg-[var(--teal)]", text: "text-foreground", label: "中" },
-    低: { dot: "bg-muted-foreground/50", text: "text-muted-foreground", label: "低" },
-  };
-  const v = map[p] ?? map["低"];
+function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 text-xs ${v.text}`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${v.dot}`} />
-      {v.label}
-    </span>
+    <Card className="rounded-sm border-border shadow-none">
+      <CardContent className="p-3">
+        <div className="text-[9px] uppercase leading-snug tracking-[0.14em] text-muted-foreground">
+          {label}
+        </div>
+        <div className="mt-1.5 text-lg font-semibold tracking-tight text-foreground">
+          {value}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function QualificationTags({ company }: { company: Parameters<typeof getListQualificationTags>[0] }) {
+  const tags = getListQualificationTags(company);
+  if (tags.length === 0) {
+    return <span className="text-sm text-muted-foreground">待补充</span>;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {tags.map((tag) => (
+        <Badge
+          key={tag}
+          variant="outline"
+          className="rounded-sm border-border bg-muted/30 px-2 py-0.5 text-[11px] font-normal"
+        >
+          {tag}
+        </Badge>
+      ))}
+    </div>
   );
 }
 
 function CompaniesPage() {
+  const [province, setProvince] = useState<string>(ALL);
   const [city, setCity] = useState<string>(ALL);
-  const [segment, setSegment] = useState<string>(ALL);
-  const [priority, setPriority] = useState<string>(ALL);
+  const [sectorCatI, setSectorCatI] = useState<string>(ALL);
+  const [sectorCatII, setSectorCatII] = useState<string>(ALL);
+  const [sectorCatIII, setSectorCatIII] = useState<string>(ALL);
+  const [creditCat, setCreditCat] = useState<string>(ALL);
+  const [listedStatus, setListedStatus] = useState<string>(ALL);
 
   const { data, isLoading } = useQuery({
     queryKey: ["companies"],
@@ -63,25 +98,63 @@ function CompaniesPage() {
   const loadFailed = data?.loadFailed ?? false;
   const errorMessage = data?.errorMessage;
 
-  const cities = useMemo(
-    () => Array.from(new Set(companies.map((c) => c.city).filter(Boolean))),
+  const provinces = useMemo(
+    () => uniqueFilterOptions(companies.map((company) => company.province)),
     [companies],
   );
-  const segments = useMemo(
-    () => Array.from(new Set(companies.map((c) => c.segment).filter(Boolean))),
+
+  const cities = useMemo(() => {
+    const source =
+      province === ALL
+        ? companies
+        : companies.filter((company) => company.province === province);
+    return uniqueFilterOptions(source.map((company) => company.city));
+  }, [companies, province]);
+
+  const sectorCatIOptions = useMemo(
+    () => uniqueFilterOptions(companies.map((company) => company.sector_cat_i)),
     [companies],
   );
-  const priorities = ["高", "中", "低"];
+  const sectorCatIIOptions = useMemo(
+    () => uniqueFilterOptions(companies.map((company) => company.sector_cat_ii)),
+    [companies],
+  );
+  const sectorCatIIIOptions = useMemo(
+    () => uniqueFilterOptions(companies.map((company) => company.sector_cat_iii)),
+    [companies],
+  );
+  const creditCatOptions = useMemo(
+    () => uniqueFilterOptions(companies.map((company) => company.credit_cat)),
+    [companies],
+  );
+  const listedStatusOptions = useMemo(
+    () => uniqueFilterOptions(companies.map((company) => company.listed_status)),
+    [companies],
+  );
 
   const filtered = useMemo(
     () =>
-      companies.filter(
-        (c) =>
-          (city === ALL || c.city === city) &&
-          (segment === ALL || c.segment === segment) &&
-          (priority === ALL || c.priority === priority),
-      ),
-    [companies, city, segment, priority],
+      companies.filter((company) => {
+        if (province !== ALL && company.province !== province) return false;
+        if (city !== ALL && company.city !== city) return false;
+        if (sectorCatI !== ALL && company.sector_cat_i !== sectorCatI) return false;
+        if (sectorCatII !== ALL && company.sector_cat_ii !== sectorCatII) return false;
+        if (sectorCatIII !== ALL && company.sector_cat_iii !== sectorCatIII) return false;
+        if (creditCat !== ALL && company.credit_cat !== creditCat) return false;
+        if (listedStatus !== ALL && company.listed_status !== listedStatus) return false;
+        return true;
+      }),
+    [companies, province, city, sectorCatI, sectorCatII, sectorCatIII, creditCat, listedStatus],
+  );
+
+  const stats = useMemo(
+    () => ({
+      total: companies.length,
+      listed: companies.filter((company) => isYes(company.listed_status)).length,
+      nationalZjtx: companies.filter((company) => isYes(company.national_zjtx_status)).length,
+      provincialZjtx: companies.filter((company) => isYes(company.provincial_zjtx_status)).length,
+    }),
+    [companies],
   );
 
   return (
@@ -95,7 +168,7 @@ function CompaniesPage() {
           目标企业名单
         </h1>
         <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
-          基于产业研究形成的结构化目标客群清单，支持按区域、赛道与营销优先级筛选，定位授信准入与营销切入路径。
+          基于客群分类、企业资质、授信潜力与竞争力标签，辅助客户经理识别重点营销对象
         </p>
       </header>
 
@@ -112,73 +185,186 @@ function CompaniesPage() {
         </div>
       )}
 
-      <div className="flex flex-wrap items-end gap-3">
-        <FilterSelect label="城市" value={city} onChange={setCity} options={cities} disabled={isLoading} />
-        <FilterSelect label="细分赛道" value={segment} onChange={setSegment} options={segments} disabled={isLoading} />
-        <FilterSelect label="营销优先级" value={priority} onChange={setPriority} options={priorities} disabled={isLoading} />
-        <div className="ml-auto self-end text-xs text-muted-foreground">
-          已筛选 <span className="font-semibold text-foreground">{filtered.length}</span> / {companies.length} 家
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="目标企业数量" value={stats.total} />
+        <StatCard label="上市公司数量" value={stats.listed} />
+        <StatCard label="国家级专精特新企业数量" value={stats.nationalZjtx} />
+        <StatCard label="省级专精特新企业数量" value={stats.provincialZjtx} />
+      </div>
+
+      <div className="flex flex-wrap items-end gap-2">
+        <FilterSelect
+          label="省份"
+          value={province}
+          onChange={(value) => {
+            setProvince(value);
+            setCity(ALL);
+          }}
+          options={provinces}
+          disabled={isLoading}
+        />
+        <FilterSelect
+          label="城市"
+          value={city}
+          onChange={setCity}
+          options={cities}
+          disabled={isLoading}
+        />
+        <FilterSelect
+          label="一级客群分类"
+          value={sectorCatI}
+          onChange={setSectorCatI}
+          options={sectorCatIOptions}
+          disabled={isLoading}
+        />
+        <FilterSelect
+          label="二级客群分类"
+          value={sectorCatII}
+          onChange={setSectorCatII}
+          options={sectorCatIIOptions}
+          disabled={isLoading}
+        />
+        <FilterSelect
+          label="三级客群分类"
+          value={sectorCatIII}
+          onChange={setSectorCatIII}
+          options={sectorCatIIIOptions}
+          disabled={isLoading}
+        />
+        <FilterSelect
+          label="授信潜力"
+          value={creditCat}
+          onChange={setCreditCat}
+          options={creditCatOptions}
+          disabled={isLoading}
+        />
+        <FilterSelect
+          label="上市状态"
+          value={listedStatus}
+          onChange={setListedStatus}
+          options={listedStatusOptions}
+          disabled={isLoading}
+        />
+        <div className="ml-auto self-end text-[11px] text-muted-foreground">
+          已筛选 <span className="font-semibold text-foreground">{filtered.length}</span> /{" "}
+          {companies.length} 家
         </div>
       </div>
 
       <div className="border border-border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-b border-border bg-muted/40">
-              <TableHead className="px-4 py-3 text-[11px] uppercase tracking-wider text-muted-foreground">企业名称</TableHead>
-              <TableHead className="px-4 py-3 text-[11px] uppercase tracking-wider text-muted-foreground">城市</TableHead>
-              <TableHead className="px-4 py-3 text-[11px] uppercase tracking-wider text-muted-foreground">细分赛道</TableHead>
-              <TableHead className="px-4 py-3 text-[11px] uppercase tracking-wider text-muted-foreground">主营产品</TableHead>
-              <TableHead className="px-4 py-3 text-[11px] uppercase tracking-wider text-muted-foreground">优先级</TableHead>
-              <TableHead className="px-4 py-3 text-[11px] uppercase tracking-wider text-muted-foreground">营销切入</TableHead>
-              <TableHead className="px-4 py-3 text-[11px] uppercase tracking-wider text-muted-foreground">风险识别</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+        <div className="max-h-[min(520px,calc(100vh-22rem))] overflow-auto">
+          <table className="w-full caption-bottom text-sm">
+            <TableHeader className="sticky top-0 z-10 bg-muted/95 backdrop-blur-sm [&_tr]:border-b">
+              <TableRow className="border-b border-border bg-muted/40 hover:bg-muted/40">
+              <TableHead className="min-w-[180px] bg-muted/95 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                企业名称
+              </TableHead>
+              <TableHead className="min-w-[120px] bg-muted/95 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                所在地
+              </TableHead>
+              <TableHead className="min-w-[120px] bg-muted/95 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                一级客群分类
+              </TableHead>
+              <TableHead className="min-w-[120px] bg-muted/95 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                二级客群分类
+              </TableHead>
+              <TableHead className="min-w-[120px] bg-muted/95 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                三级客群分类
+              </TableHead>
+              <TableHead className="min-w-[160px] bg-muted/95 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                主营产品
+              </TableHead>
+              <TableHead className="min-w-[100px] bg-muted/95 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                授信潜力
+              </TableHead>
+              <TableHead className="min-w-[120px] bg-muted/95 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                上市状态
+              </TableHead>
+              <TableHead className="min-w-[180px] bg-muted/95 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                重点资质
+              </TableHead>
+              <TableHead className="min-w-[120px] bg-muted/95 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                赛道吸引力
+              </TableHead>
+              <TableHead className="min-w-[160px] bg-muted/95 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                行业专属竞争力标签
+              </TableHead>
+              <TableHead className="min-w-[88px] bg-muted/95 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                操作
+              </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={7} className="py-12 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={12} className="py-12 text-center text-sm text-muted-foreground">
                   正在加载企业数据...
                 </TableCell>
               </TableRow>
             )}
             {!isLoading &&
-              filtered.map((c) => (
-                <TableRow key={c.id} className="border-b border-border/70 hover:bg-muted/30">
-                  <TableCell className="px-4 py-4 align-top">
+              filtered.map((company) => (
+                <TableRow key={company.id} className="border-b border-border/70 hover:bg-muted/30">
+                  <TableCell className="px-3 py-3 align-top">
                     <Link
                       to="/companies/$id"
-                      params={{ id: c.id }}
+                      params={{ id: company.id }}
                       className="font-medium text-foreground hover:text-[var(--primary)] hover:underline"
                     >
-                      {c.name}
+                      {displayValue(company.company_name)}
                     </Link>
                   </TableCell>
-                  <TableCell className="px-4 py-4 align-top text-sm text-foreground">{c.city}</TableCell>
-                  <TableCell className="px-4 py-4 align-top text-sm text-foreground">{c.segment}</TableCell>
-                  <TableCell className="max-w-[220px] px-4 py-4 align-top text-sm text-muted-foreground">
-                    {c.products}
+                  <TableCell className="px-3 py-3 align-top text-sm text-foreground">
+                    {formatLocation(company.province, company.city)}
                   </TableCell>
-                  <TableCell className="px-4 py-4 align-top">
-                    <PriorityTag p={c.priority} />
+                  <TableCell className="px-3 py-3 align-top text-sm text-foreground">
+                    {displayValue(company.sector_cat_i)}
                   </TableCell>
-                  <TableCell className="max-w-[240px] px-4 py-4 align-top text-sm text-foreground/90">
-                    {c.opportunity}
+                  <TableCell className="px-3 py-3 align-top text-sm text-foreground">
+                    {displayValue(company.sector_cat_ii)}
                   </TableCell>
-                  <TableCell className="max-w-[240px] px-4 py-4 align-top text-sm text-muted-foreground">
-                    {c.risk}
+                  <TableCell className="px-3 py-3 align-top text-sm text-foreground">
+                    {displayValue(company.sector_cat_iii)}
+                  </TableCell>
+                  <TableCell className="max-w-[220px] px-3 py-3 align-top text-sm text-muted-foreground">
+                    {displayValue(company.main_product)}
+                  </TableCell>
+                  <TableCell className="px-3 py-3 align-top text-sm text-foreground">
+                    {displayValue(company.credit_cat)}
+                  </TableCell>
+                  <TableCell className="px-3 py-3 align-top text-sm text-foreground">
+                    {formatListedStatus(company.listed_status, company.listed_code)}
+                  </TableCell>
+                  <TableCell className="px-3 py-3 align-top">
+                    <QualificationTags company={company} />
+                  </TableCell>
+                  <TableCell className="px-3 py-3 align-top text-sm text-foreground">
+                    {displayValue(company.sector_attractiveness_status)}
+                  </TableCell>
+                  <TableCell className="max-w-[220px] px-3 py-3 align-top text-sm text-muted-foreground">
+                    {displayValue(company.industry_specific_competitive_tag)}
+                  </TableCell>
+                  <TableCell className="px-3 py-3 align-top">
+                    <Link
+                      to="/companies/$id"
+                      params={{ id: company.id }}
+                      className="text-sm text-[var(--primary)] hover:underline"
+                    >
+                      查看详情
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))}
             {!isLoading && filtered.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="py-12 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={12} className="py-12 text-center text-sm text-muted-foreground">
                   当前筛选条件下暂无目标企业
                 </TableCell>
               </TableRow>
             )}
-          </TableBody>
-        </Table>
+            </TableBody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -198,19 +384,19 @@ function FilterSelect({
   disabled?: boolean;
 }) {
   return (
-    <div className="space-y-1.5">
-      <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+    <div className="space-y-1">
+      <div className="text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
         {label}
       </div>
       <Select value={value} onValueChange={onChange} disabled={disabled}>
-        <SelectTrigger className="w-44 rounded-sm">
+        <SelectTrigger className="h-8 w-[7.5rem] rounded-sm text-xs">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value={ALL}>全部</SelectItem>
-          {options.map((o) => (
-            <SelectItem key={o} value={o}>
-              {o}
+          {options.map((option) => (
+            <SelectItem key={option} value={option}>
+              {option}
             </SelectItem>
           ))}
         </SelectContent>

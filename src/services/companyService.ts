@@ -1,5 +1,7 @@
-import { companies as fallbackCompanies, type Company } from "@/data/companies";
 import { supabase } from "@/lib/supabase";
+import type { Company, CompanyRow } from "@/types/company";
+
+export type { Company } from "@/types/company";
 
 export type CompanyQueryResult = {
   companies: Company[];
@@ -20,93 +22,53 @@ function getErrorMessage(error: unknown): string {
   return String(error);
 }
 
-type CompanyRow = {
-  id: string;
-  company_name: string;
-  province: string | null;
-  city: string | null;
-  industry: string | null;
-  segment: string | null;
-  main_products: string | null;
-  priority_level: string | null;
-  banking_opportunity: string | null;
-  product_solutions: string | null;
-  risk_focus: string | null;
-  marketing_suggestion: string | null;
-  credit_assessment: string | null;
-  visit_questions: string | null;
-  source_note: string | null;
-  updated_at: string | null;
-};
-
-function parseTextList(value: unknown): string[] {
-  if (value == null) return [];
-
-  if (Array.isArray(value)) {
-    return value.map(String).map((item) => item.trim()).filter(Boolean);
-  }
-
-  if (typeof value !== "string") {
-    return [String(value)].filter(Boolean);
-  }
-
-  const trimmed = value.trim();
-  if (!trimmed) return [];
-
-  if (trimmed.startsWith("[")) {
-    try {
-      const parsed = JSON.parse(trimmed) as unknown;
-      if (Array.isArray(parsed)) {
-        return parsed.map(String).map((item) => item.trim()).filter(Boolean);
-      }
-    } catch {
-      // Fall through to delimiter-based parsing.
-    }
-  }
-
-  return trimmed
-    .split(/\r?\n|；|;|、/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-function normalizePriority(value: string | null | undefined): Company["priority"] {
-  if (!value) return "低";
-
-  const normalized = value.trim().toLowerCase();
-  if (normalized === "高" || normalized === "high" || normalized === "h") {
-    return "高";
-  }
-  if (normalized === "中" || normalized === "medium" || normalized === "m") {
-    return "中";
-  }
-  if (normalized === "低" || normalized === "low" || normalized === "l") {
-    return "低";
-  }
-
-  return "低";
+function toNullableString(value: unknown): string | null {
+  if (value == null) return null;
+  const text = String(value).trim();
+  return text === "" ? null : text;
 }
 
 function mapRowToCompany(row: CompanyRow): Company {
-  const intro =
-    row.source_note?.trim() ||
-    [row.industry, row.main_products].filter(Boolean).join(" · ") ||
-    "";
-
   return {
     id: row.id,
-    name: row.company_name,
-    city: row.city ?? "",
-    segment: row.segment ?? "",
-    products: row.main_products ?? "",
-    priority: normalizePriority(row.priority_level),
-    opportunity: row.banking_opportunity ?? "",
-    risk: row.risk_focus ?? "",
-    intro,
-    marketingHooks: parseTextList(row.marketing_suggestion),
-    productPlan: parseTextList(row.product_solutions),
-    creditFocus: parseTextList(row.credit_assessment),
-    visitQuestions: parseTextList(row.visit_questions),
+    company_name: toNullableString(row.company_name) ?? "",
+    corp_id: toNullableString(row.corp_id),
+    uni_credit_id: toNullableString(row.uni_credit_id),
+    province: toNullableString(row.province),
+    city: toNullableString(row.city),
+    sector_cat_i: toNullableString(row.sector_cat_i),
+    sector_cat_ii: toNullableString(row.sector_cat_ii),
+    sector_cat_iii: toNullableString(row.sector_cat_iii),
+    main_product: toNullableString(row.main_product),
+    sector_attractiveness_status: toNullableString(row.sector_attractiveness_status),
+    credit_cat: toNullableString(row.credit_cat),
+    listed_status: toNullableString(row.listed_status),
+    listed_code: toNullableString(row.listed_code),
+    pre_listed_status: toNullableString(row.pre_listed_status),
+    national_zjtx_status: toNullableString(row.national_zjtx_status),
+    provincial_zjtx_status: toNullableString(row.provincial_zjtx_status),
+    capital_market_financing_status: toNullableString(row.capital_market_financing_status),
+    dengling_status: toNullableString(row.dengling_status),
+    industry_specific_competitive_tag: toNullableString(row.industry_specific_competitive_tag),
+    corp_scale: toNullableString(row.corp_scale),
+    group_name: toNullableString(row.group_name),
+    short_intro: toNullableString(row.short_intro),
+    established_year: toNullableString(row.established_year),
+    staff_number: toNullableString(row.staff_number),
+    registered_capital_10k_rmb: toNullableString(row.registered_capital_10k_rmb),
+    revenue_100mn_rmb: toNullableString(row.revenue_100mn_rmb),
+    revenue_growth_rate: toNullableString(row.revenue_growth_rate),
+    net_profit_100mn_rmb: toNullableString(row.net_profit_100mn_rmb),
+    gpm: toNullableString(row.gpm),
+    npm: toNullableString(row.npm),
+    total_asset_100mn_rmb: toNullableString(row.total_asset_100mn_rmb),
+    total_liability_100mn_rmb: toNullableString(row.total_liability_100mn_rmb),
+    asset_liability_ratio: toNullableString(row.asset_liability_ratio),
+    marketing_strategy: toNullableString(row.marketing_strategy),
+    risk_strategy: toNullableString(row.risk_strategy),
+    product_recommend: toNullableString(row.product_recommend),
+    source_note: toNullableString(row.source_note),
+    updated_at: toNullableString(row.updated_at),
   };
 }
 
@@ -129,7 +91,7 @@ export async function getCompanies(): Promise<CompanyQueryResult> {
   } catch (error) {
     console.error("Failed to load companies from Supabase:", error);
     return {
-      companies: fallbackCompanies,
+      companies: [],
       loadFailed: true,
       errorMessage: getErrorMessage(error),
     };
@@ -159,7 +121,7 @@ export async function getCompanyById(id: string): Promise<CompanyDetailResult> {
   } catch (error) {
     console.error(`Failed to load company ${id} from Supabase:`, error);
     return {
-      company: fallbackCompanies.find((company) => company.id === id) ?? null,
+      company: null,
       loadFailed: true,
       errorMessage: getErrorMessage(error),
     };
