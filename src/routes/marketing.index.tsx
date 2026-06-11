@@ -21,7 +21,6 @@ import {
   getIndustryThemeStats,
 } from "@/lib/marketingIndustryThemes";
 import {
-  formatPlaybookSource,
   formatSectorPath,
   summarizeText,
 } from "@/lib/marketingPlaybookDisplay";
@@ -71,34 +70,43 @@ function MarketingPlaybookListPage() {
     () => uniqueFilterOptions(playbooks.map((item) => item.sector_cat_i)),
     [playbooks],
   );
+
+  const playbooksForLevelII = useMemo(() => {
+    if (sectorCatI === ALL) return playbooks;
+    return playbooks.filter((item) => item.sector_cat_i === sectorCatI);
+  }, [playbooks, sectorCatI]);
+
   const sectorCatIIOptions = useMemo(
-    () => uniqueFilterOptions(playbooks.map((item) => item.sector_cat_ii)),
-    [playbooks],
+    () => uniqueFilterOptions(playbooksForLevelII.map((item) => item.sector_cat_ii)),
+    [playbooksForLevelII],
   );
+
+  const playbooksForLevelIII = useMemo(() => {
+    if (sectorCatII === ALL) return playbooksForLevelII;
+    return playbooksForLevelII.filter((item) => item.sector_cat_ii === sectorCatII);
+  }, [playbooksForLevelII, sectorCatII]);
+
   const sectorCatIIIOptions = useMemo(
-    () => uniqueFilterOptions(playbooks.map((item) => item.sector_cat_iii)),
-    [playbooks],
+    () => uniqueFilterOptions(playbooksForLevelIII.map((item) => item.sector_cat_iii)),
+    [playbooksForLevelIII],
   );
 
   const filtered = useMemo(() => {
-    let result = playbooks;
+    if (hasSectorFilters) {
+      return playbooks.filter((item) => {
+        if (sectorCatI !== ALL && item.sector_cat_i !== sectorCatI) return false;
+        if (sectorCatII !== ALL && item.sector_cat_ii !== sectorCatII) return false;
+        if (sectorCatIII !== ALL && item.sector_cat_iii !== sectorCatIII) return false;
+        return true;
+      });
+    }
 
     if (selectedTheme) {
-      result = filterPlaybooksByTheme(result, selectedTheme);
+      return filterPlaybooksByTheme(playbooks, selectedTheme);
     }
 
-    if (sectorCatI !== ALL) {
-      result = result.filter((item) => item.sector_cat_i === sectorCatI);
-    }
-    if (sectorCatII !== ALL) {
-      result = result.filter((item) => item.sector_cat_ii === sectorCatII);
-    }
-    if (sectorCatIII !== ALL) {
-      result = result.filter((item) => item.sector_cat_iii === sectorCatIII);
-    }
-
-    return result;
-  }, [playbooks, selectedTheme, sectorCatI, sectorCatII, sectorCatIII]);
+    return [];
+  }, [playbooks, selectedTheme, hasSectorFilters, sectorCatI, sectorCatII, sectorCatIII]);
 
   const clearFilters = () => {
     setSectorCatI(ALL);
@@ -107,11 +115,21 @@ function MarketingPlaybookListPage() {
     setSelectedThemeId(null);
   };
 
-  const handleSectorFilterChange = (
-    setter: (value: string) => void,
-    value: string,
-  ) => {
-    setter(value);
+  const handleSectorCatIChange = (value: string) => {
+    setSectorCatI(value);
+    setSectorCatII(ALL);
+    setSectorCatIII(ALL);
+    setSelectedThemeId(null);
+  };
+
+  const handleSectorCatIIChange = (value: string) => {
+    setSectorCatII(value);
+    setSectorCatIII(ALL);
+    setSelectedThemeId(null);
+  };
+
+  const handleSectorCatIIIChange = (value: string) => {
+    setSectorCatIII(value);
     setSelectedThemeId(null);
   };
 
@@ -147,21 +165,21 @@ function MarketingPlaybookListPage() {
         <FilterSelect
           label="一级客群分类"
           value={sectorCatI}
-          onChange={(value) => handleSectorFilterChange(setSectorCatI, value)}
+          onChange={handleSectorCatIChange}
           options={sectorCatIOptions}
           disabled={isLoading}
         />
         <FilterSelect
           label="二级客群分类"
           value={sectorCatII}
-          onChange={(value) => handleSectorFilterChange(setSectorCatII, value)}
+          onChange={handleSectorCatIIChange}
           options={sectorCatIIOptions}
           disabled={isLoading}
         />
         <FilterSelect
           label="三级客群分类"
           value={sectorCatIII}
-          onChange={(value) => handleSectorFilterChange(setSectorCatIII, value)}
+          onChange={handleSectorCatIIIChange}
           options={sectorCatIIIOptions}
           disabled={isLoading}
         />
@@ -343,10 +361,6 @@ function PlaybookCardGrid({ playbooks }: { playbooks: MarketingPlaybook[] }) {
                 label="产品和业务机会"
                 content={playbook.product_opportunities}
               />
-            </div>
-
-            <div className="text-xs text-muted-foreground">
-              来源：{formatPlaybookSource(playbook.source_doc, playbook.source_pages)}
             </div>
 
             <Link

@@ -4,7 +4,6 @@ import { ArrowLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { displayValue, formatUpdatedAt } from "@/lib/companyDisplay";
 import {
-  formatPlaybookSource,
   formatSectorPath,
 } from "@/lib/marketingPlaybookDisplay";
 import { getMarketingPlaybookById } from "@/services/marketingPlaybookService";
@@ -114,11 +113,7 @@ function MarketingPlaybookDetailPage() {
       </div>
 
       <footer className="border-t border-border pt-4 text-xs leading-relaxed text-muted-foreground">
-        <p>
-          信息来源：{formatPlaybookSource(playbook.source_doc, playbook.source_pages)}
-          <span className="mx-2 text-border">|</span>
-          更新时间：{formatUpdatedAt(playbook.updated_at)}
-        </p>
+        <p>更新时间：{formatUpdatedAt(playbook.updated_at)}</p>
       </footer>
     </div>
   );

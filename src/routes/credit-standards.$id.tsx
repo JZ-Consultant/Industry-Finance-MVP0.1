@@ -20,11 +20,11 @@ export const Route = createFileRoute("/credit-standards/$id")({
   head: ({ loaderData }) => ({
     meta: [
       {
-        title: `${loaderData?.standard?.standard_title ?? "信审评估标准详情"} · 工作台`,
+        title: `${loaderData?.standard?.standard_title ?? "信审评估要点详情"} · 工作台`,
       },
       {
         name: "description",
-        content: loaderData?.standard?.customer_intro ?? "信审评估标准详情",
+        content: loaderData?.standard?.customer_intro ?? "信审评估要点详情",
       },
     ],
   }),
@@ -36,14 +36,14 @@ export const Route = createFileRoute("/credit-standards/$id")({
   },
   pendingComponent: () => (
     <div className="px-8 py-10 text-sm text-muted-foreground">
-      正在加载信审评估标准...
+      正在加载信审评估要点...
     </div>
   ),
   notFoundComponent: () => (
     <div className="space-y-4 px-8 py-10">
-      <p className="text-sm text-muted-foreground">未找到该信审评估标准</p>
+      <p className="text-sm text-muted-foreground">未找到该信审评估要点</p>
       <Button asChild variant="outline" size="sm" className="rounded-sm">
-        <Link to="/credit-standards">返回信审评估标准</Link>
+        <Link to="/credit-standards">返回信审评估要点</Link>
       </Button>
     </div>
   ),
@@ -55,19 +55,6 @@ export const Route = createFileRoute("/credit-standards/$id")({
   component: CreditStandardDetailPage,
 });
 
-function formatDetailSource(
-  sourceDoc: string | null | undefined,
-  sourcePages: string | null | undefined,
-): string {
-  const doc = sourceDoc?.trim();
-  const pages = sourcePages?.trim();
-
-  if (doc && pages) return `${doc} · ${pages}`;
-  if (doc) return doc;
-  if (pages) return pages;
-  return "待补充";
-}
-
 function CreditStandardDetailPage() {
   const { standard, loadFailed, errorMessage } = Route.useLoaderData();
 
@@ -78,10 +65,10 @@ function CreditStandardDetailPage() {
           to="/credit-standards"
           className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="h-3.5 w-3.5" /> 返回信审评估标准
+          <ArrowLeft className="h-3.5 w-3.5" /> 返回信审评估要点
         </Link>
         <div className="rounded-sm border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-          信审评估标准加载失败，请稍后重试
+          信审评估要点加载失败，请稍后重试
           {errorMessage ? `：${errorMessage}` : ""}
         </div>
       </div>
@@ -96,13 +83,13 @@ function CreditStandardDetailPage() {
         to="/credit-standards"
         className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="h-3.5 w-3.5" /> 返回信审评估标准
+        <ArrowLeft className="h-3.5 w-3.5" /> 返回信审评估要点
       </Link>
 
       <header className="space-y-2 border-b border-border pb-6">
         <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
           <span className="h-px w-6 bg-[var(--gold)]" />
-          授信准入 · 评估标准
+          授信准入 · 评估要点
         </div>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           {displayValue(standard.standard_title)}
@@ -168,11 +155,7 @@ function CreditStandardDetailPage() {
       </div>
 
       <footer className="border-t border-border pt-4 text-xs leading-relaxed text-muted-foreground">
-        <p>
-          来源：{formatDetailSource(standard.source_doc, standard.source_pages)}
-          <span className="mx-2 text-border">|</span>
-          更新时间：{formatUpdatedAt(standard.updated_at ?? null)}
-        </p>
+        <p>更新时间：{formatUpdatedAt(standard.updated_at ?? null)}</p>
       </footer>
     </div>
   );

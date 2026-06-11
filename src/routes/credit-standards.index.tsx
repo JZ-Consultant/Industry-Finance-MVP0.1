@@ -7,11 +7,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   CREDIT_INDUSTRY_THEMES,
   getCreditStandardsByTheme,
   getCreditThemeStats,
   type CreditIndustryTheme,
 } from "@/lib/creditIndustryThemes";
+import { uniqueFilterOptions } from "@/lib/companyDisplay";
 import { formatSectorPath } from "@/lib/marketingPlaybookDisplay";
 import { ModulePageHeader } from "@/components/workbench/ModulePageHeader";
 import { getCreditStandards } from "@/services/creditStandardService";
@@ -21,7 +29,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/credit-standards/")({
   head: () => ({
     meta: [
-      { title: "信审评估标准 · 产业金融知识资产工作台" },
+      { title: "信审评估要点 · 产业金融知识资产工作台" },
       {
         name: "description",
         content:
@@ -32,45 +40,12 @@ export const Route = createFileRoute("/credit-standards/")({
   component: CreditStandardsPage,
 });
 
-function getCreditThemeByKey(key: string): CreditIndustryTheme | undefined {
-  return CREDIT_INDUSTRY_THEMES.find((theme) => theme.key === key);
-}
-
-function summarizeIntro(value: string | null | undefined, maxLength = 140): string {
-  const text = value?.trim();
-  if (!text) return "待补充";
-  if (text.length <= maxLength) return text;
-  return `${text.slice(0, maxLength).trim()}…`;
-}
-
-function formatStandardSource(
-  sourceDoc: string | null | undefined,
-  sourcePages: string | null | undefined,
-): string {
-  const doc = sourceDoc?.trim();
-  const pages = sourcePages?.trim();
-
-  if (doc && pages) return `${doc} · 第 ${pages} 页`;
-  if (doc) return doc;
-  if (pages) return `第 ${pages} 页`;
-  return "待补充";
-}
-
-function getEvaluationDimensions(standard: CreditStandard, limit = 5): string[] {
-  const items = getEvaluationItems(standard.evaluation_items);
-  const dimensions: string[] = [];
-
-  for (const item of items) {
-    const dimension = item.dimension?.trim();
-    if (!dimension || dimensions.includes(dimension)) continue;
-    dimensions.push(dimension);
-    if (dimensions.length >= limit) break;
-  }
-
-  return dimensions;
-}
+const ALL = "__all__";
 
 function CreditStandardsPage() {
+  const [sectorCatI, setSectorCatI] = useState<string>(ALL);
+  const [sectorCatII, setSectorCatII] = useState<string>(ALL);
+  const [sectorCatIII, setSectorCatIII] = useState<string>(ALL);
   const [selectedThemeKey, setSelectedThemeKey] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -82,15 +57,82 @@ function CreditStandardsPage() {
   const loadFailed = data?.loadFailed ?? false;
   const errorMessage = data?.errorMessage;
 
+  const hasSectorFilters =
+    sectorCatI !== ALL || sectorCatII !== ALL || sectorCatIII !== ALL;
   const selectedTheme = selectedThemeKey ? getCreditThemeByKey(selectedThemeKey) : undefined;
-  const showListView = selectedThemeKey !== null;
+  const showListView = hasSectorFilters || selectedThemeKey !== null;
+
+  const sectorCatIOptions = useMemo(
+    () => uniqueFilterOptions(standards.map((item) => item.sector_cat_i)),
+    [standards],
+  );
+
+  const standardsForLevelII = useMemo(() => {
+    if (sectorCatI === ALL) return standards;
+    return standards.filter((item) => item.sector_cat_i === sectorCatI);
+  }, [standards, sectorCatI]);
+
+  const sectorCatIIOptions = useMemo(
+    () => uniqueFilterOptions(standardsForLevelII.map((item) => item.sector_cat_ii)),
+    [standardsForLevelII],
+  );
+
+  const standardsForLevelIII = useMemo(() => {
+    if (sectorCatII === ALL) return standardsForLevelII;
+    return standardsForLevelII.filter((item) => item.sector_cat_ii === sectorCatII);
+  }, [standardsForLevelII, sectorCatII]);
+
+  const sectorCatIIIOptions = useMemo(
+    () => uniqueFilterOptions(standardsForLevelIII.map((item) => item.sector_cat_iii)),
+    [standardsForLevelIII],
+  );
 
   const filteredStandards = useMemo(() => {
-    if (!selectedTheme) return [];
-    return getCreditStandardsByTheme(standards, selectedTheme);
-  }, [standards, selectedTheme]);
+    if (hasSectorFilters) {
+      return standards.filter((item) => {
+        if (sectorCatI !== ALL && item.sector_cat_i !== sectorCatI) return false;
+        if (sectorCatII !== ALL && item.sector_cat_ii !== sectorCatII) return false;
+        if (sectorCatIII !== ALL && item.sector_cat_iii !== sectorCatIII) return false;
+        return true;
+      });
+    }
+
+    if (selectedTheme) {
+      return getCreditStandardsByTheme(standards, selectedTheme);
+    }
+
+    return [];
+  }, [standards, selectedTheme, hasSectorFilters, sectorCatI, sectorCatII, sectorCatIII]);
+
+  const clearFilters = () => {
+    setSectorCatI(ALL);
+    setSectorCatII(ALL);
+    setSectorCatIII(ALL);
+    setSelectedThemeKey(null);
+  };
+
+  const handleSectorCatIChange = (value: string) => {
+    setSectorCatI(value);
+    setSectorCatII(ALL);
+    setSectorCatIII(ALL);
+    setSelectedThemeKey(null);
+  };
+
+  const handleSectorCatIIChange = (value: string) => {
+    setSectorCatII(value);
+    setSectorCatIII(ALL);
+    setSelectedThemeKey(null);
+  };
+
+  const handleSectorCatIIIChange = (value: string) => {
+    setSectorCatIII(value);
+    setSelectedThemeKey(null);
+  };
 
   const handleViewTheme = (themeKey: string) => {
+    setSectorCatI(ALL);
+    setSectorCatII(ALL);
+    setSectorCatIII(ALL);
     setSelectedThemeKey(themeKey);
   };
 
@@ -101,8 +143,8 @@ function CreditStandardsPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-8 py-10">
       <ModulePageHeader
-        eyebrow="授信准入 · 评估标准"
-        title="信审评估标准"
+        eyebrow="授信准入 · 评估要点"
+        title="信审评估要点"
         subtitle="按产业主题与细分客群沉淀授信评估框架、竞争力分析要点和关键风险识别信号，辅助客户经理和信审人员开展产业化风险判断。"
       />
 
@@ -112,47 +154,100 @@ function CreditStandardsPage() {
 
       {isLoading && (
         <div className="rounded-sm border border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-          正在加载信审评估标准...
+          正在加载信审评估要点...
         </div>
       )}
 
       {!isLoading && loadFailed && (
         <div className="rounded-sm border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-          信审评估标准加载失败，请稍后重试
+          信审评估要点加载失败，请稍后重试
           {errorMessage ? `：${errorMessage}` : ""}
         </div>
       )}
+
+      <div className="flex flex-wrap items-end gap-2">
+        <FilterSelect
+          label="一级客群分类"
+          value={sectorCatI}
+          onChange={handleSectorCatIChange}
+          options={sectorCatIOptions}
+          disabled={isLoading}
+        />
+        <FilterSelect
+          label="二级客群分类"
+          value={sectorCatII}
+          onChange={handleSectorCatIIChange}
+          options={sectorCatIIOptions}
+          disabled={isLoading}
+        />
+        <FilterSelect
+          label="三级客群分类"
+          value={sectorCatIII}
+          onChange={handleSectorCatIIIChange}
+          options={sectorCatIIIOptions}
+          disabled={isLoading}
+        />
+
+        {showListView && (
+          <div className="ml-auto flex items-center gap-3 self-end">
+            <div className="text-[11px] text-muted-foreground">
+              已筛选{" "}
+              <span className="font-semibold text-foreground">{filteredStandards.length}</span> /{" "}
+              {standards.length} 条
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 rounded-sm px-2 text-xs text-muted-foreground hover:text-foreground"
+              onClick={clearFilters}
+            >
+              清除筛选
+            </Button>
+          </div>
+        )}
+      </div>
 
       {!isLoading && !showListView && (
         <IndustryThemeGrid standards={standards} onViewTheme={handleViewTheme} />
       )}
 
-      {!isLoading && showListView && selectedTheme && (
+      {!isLoading && showListView && (
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
             <div className="space-y-1">
-              <h2 className="text-lg font-semibold tracking-tight text-foreground">
-                {selectedTheme.title} · 信审评估标准
-              </h2>
+              {hasSectorFilters ? (
+                <h2 className="text-lg font-semibold tracking-tight text-foreground">
+                  筛选结果
+                </h2>
+              ) : (
+                <h2 className="text-lg font-semibold tracking-tight text-foreground">
+                  {selectedTheme?.title} · 信审评估要点
+                </h2>
+              )}
               <p className="text-xs text-muted-foreground">
-                共 {filteredStandards.length} 条信审评估标准
+                共 {filteredStandards.length} 条信审评估要点
               </p>
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="rounded-sm"
-              onClick={handleBackToThemes}
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              返回全部产业主题
-            </Button>
+            {!hasSectorFilters && selectedTheme && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-sm"
+                onClick={handleBackToThemes}
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                返回全部产业主题
+              </Button>
+            )}
           </div>
 
           {filteredStandards.length === 0 ? (
             <div className="rounded-sm border border-border bg-muted/20 px-4 py-10 text-center text-sm text-muted-foreground">
-              该产业主题下暂无信审评估标准
+              {hasSectorFilters
+                ? "暂无匹配的信审评估要点"
+                : "该产业主题下暂无信审评估要点"}
             </div>
           ) : (
             <StandardCardGrid standards={filteredStandards} />
@@ -202,7 +297,7 @@ function IndustryThemeGrid({
               </div>
 
               <div className="text-xs text-muted-foreground">
-                已录入标准：
+                已录入要点：
                 <span className="ml-1 font-semibold text-foreground">
                   {stats.standardCount}
                 </span>{" "}
@@ -237,7 +332,7 @@ function IndustryThemeGrid({
                 className="mt-auto w-fit rounded-sm"
                 onClick={() => onViewTheme(theme.key)}
               >
-                查看标准
+                查看要点
               </Button>
             </CardContent>
           </Card>
@@ -303,10 +398,6 @@ function StandardCard({ standard }: { standard: CreditStandard }) {
           </div>
         </div>
 
-        <div className="text-xs text-muted-foreground">
-          来源：{formatStandardSource(standard.source_doc, standard.source_pages)}
-        </div>
-
         <Link
           to="/credit-standards/$id"
           params={{ id: standard.id }}
@@ -328,6 +419,66 @@ function SummaryBlock({ label, content }: { label: string; content: string }) {
         {label}
       </div>
       <p className="line-clamp-3 leading-relaxed text-foreground/90">{content}</p>
+    </div>
+  );
+}
+
+function getCreditThemeByKey(key: string): CreditIndustryTheme | undefined {
+  return CREDIT_INDUSTRY_THEMES.find((theme) => theme.key === key);
+}
+
+function summarizeIntro(value: string | null | undefined, maxLength = 140): string {
+  const text = value?.trim();
+  if (!text) return "待补充";
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength).trim()}…`;
+}
+
+function getEvaluationDimensions(standard: CreditStandard, limit = 5): string[] {
+  const items = getEvaluationItems(standard.evaluation_items);
+  const dimensions: string[] = [];
+
+  for (const item of items) {
+    const dimension = item.dimension?.trim();
+    if (!dimension || dimensions.includes(dimension)) continue;
+    dimensions.push(dimension);
+    if (dimensions.length >= limit) break;
+  }
+
+  return dimensions;
+}
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+  disabled,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  disabled?: boolean;
+}) {
+  return (
+    <div className="space-y-1">
+      <div className="text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+        {label}
+      </div>
+      <Select value={value} onValueChange={onChange} disabled={disabled}>
+        <SelectTrigger className="h-8 w-[7.5rem] rounded-sm text-xs">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL}>全部</SelectItem>
+          {options.map((option) => (
+            <SelectItem key={option} value={option}>
+              {option}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

@@ -26,7 +26,7 @@ export const Route = createFileRoute("/assistant")({
 
 const examples = [
   "请为某动力电池企业生成客户画像与拜访提纲。",
-  "结合信审评估标准，列出该企业的授信关注点。",
+  "结合信审评估要点，列出该企业的授信关注点。",
   "基于客群营销指引，输出一份综合金融方案建议。",
 ];
 
@@ -44,7 +44,7 @@ function AssistantPage() {
       <ModulePageHeader
         eyebrow={moduleDef.eyebrow}
         title="产业金融AI助手"
-        subtitle="基于目标企业名单、客群营销指引、信审评估标准、企业尽调模板与领先同业成功案例等知识资产，生成客户画像、拜访提纲、授信关注点和综合金融方案。"
+        subtitle="基于目标企业名单、客群营销指引、信审评估要点、企业尽调模板与领先同业成功案例等知识资产，生成客户画像、拜访提纲、授信关注点和综合金融方案。"
       />
 
       <BuildingStatusBanner />
@@ -107,7 +107,7 @@ function AssistantPage() {
               </p>
               <p className="text-sm leading-relaxed text-muted-foreground">
                 后续将接入 AI
-                问答能力，联动目标企业名单、客群营销指引、信审评估标准、企业尽调模板与同业成功案例，为客户经理与审批人员生成结构化的客户画像、拜访提纲、授信关注点和综合金融方案。
+                问答能力，联动目标企业名单、客群营销指引、信审评估要点、企业尽调模板与同业成功案例，为客户经理与审批人员生成结构化的客户画像、拜访提纲、授信关注点和综合金融方案。
               </p>
             </div>
           ) : (

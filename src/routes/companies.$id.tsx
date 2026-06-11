@@ -11,12 +11,14 @@ import {
   formatLocation,
   formatUpdatedAt,
   hasDetailQualifications,
-  hasFinancialData,
   isYes,
 } from "@/lib/companyDisplay";
 import { getCompanyById } from "@/services/companyService";
+import { getCreditStandards } from "@/services/creditStandardService";
+import { getDueDiligenceCasesByCompanyName } from "@/services/dueDiligenceCaseService";
 import { getMarketingPlaybookBySector } from "@/services/marketingPlaybookService";
 import type { Company } from "@/types/company";
+import type { CreditStandard } from "@/types/creditStandard";
 
 export const Route = createFileRoute("/companies/$id")({
   head: ({ loaderData }) => ({
@@ -38,11 +40,31 @@ export const Route = createFileRoute("/companies/$id")({
       result.company.sector_cat_iii,
     );
 
+    const creditStandardsResult = await getCreditStandards();
+    const matchedCreditStandard = creditStandardsResult.loadFailed
+      ? null
+      : findCreditStandardBySector(
+          creditStandardsResult.standards,
+          result.company.sector_cat_i,
+          result.company.sector_cat_ii,
+          result.company.sector_cat_iii,
+        );
+
+    const dueDiligenceCasesResult = await getDueDiligenceCasesByCompanyName(
+      result.company.company_name,
+    );
+    const matchedDueDiligenceCase =
+      dueDiligenceCasesResult.loadFailed || dueDiligenceCasesResult.cases.length === 0
+        ? null
+        : dueDiligenceCasesResult.cases[0];
+
     return {
       ...result,
       matchedPlaybook: playbookResult.playbook,
       playbookLoadFailed: playbookResult.loadFailed,
       playbookErrorMessage: playbookResult.errorMessage,
+      matchedCreditStandard,
+      matchedDueDiligenceCase,
     };
   },
   pendingComponent: () => (
@@ -65,6 +87,30 @@ export const Route = createFileRoute("/companies/$id")({
   ),
   component: CompanyDetail,
 });
+
+function findCreditStandardBySector(
+  standards: CreditStandard[],
+  sectorCatI: string | null,
+  sectorCatII: string | null,
+  sectorCatIII: string | null,
+): CreditStandard | null {
+  const normalizedI = sectorCatI?.trim();
+  const normalizedII = sectorCatII?.trim();
+  const normalizedIII = sectorCatIII?.trim();
+
+  if (!normalizedI || !normalizedII || !normalizedIII) {
+    return null;
+  }
+
+  return (
+    standards.find(
+      (standard) =>
+        standard.sector_cat_i === normalizedI &&
+        standard.sector_cat_ii === normalizedII &&
+        standard.sector_cat_iii === normalizedIII,
+    ) ?? null
+  );
+}
 
 function Section({
   no,
@@ -151,20 +197,23 @@ function StrategyCard({
   title,
   content,
   placeholder,
+  footer,
 }: {
   title: string;
   content: string | null;
   placeholder: string;
+  footer?: React.ReactNode;
 }) {
   return (
-    <Card className="rounded-none border-border">
-      <CardContent className="space-y-3 p-5">
+    <Card className="flex flex-col rounded-none border-border">
+      <CardContent className="flex min-h-[220px] flex-1 flex-col gap-4 p-6">
         <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
           {title}
         </div>
-        <p className="text-sm leading-relaxed text-foreground/90">
+        <p className="flex-1 text-sm leading-relaxed text-foreground/90">
           {content?.trim() ? content.trim() : placeholder}
         </p>
+        {footer}
       </CardContent>
     </Card>
   );
@@ -178,6 +227,8 @@ function CompanyDetail() {
     matchedPlaybook,
     playbookLoadFailed,
     playbookErrorMessage,
+    matchedCreditStandard,
+    matchedDueDiligenceCase,
   } = Route.useLoaderData();
 
   return (
@@ -236,24 +287,18 @@ function CompanyDetail() {
             value={displayValue(company.sector_attractiveness_status)}
           />
         </div>
-        <div className="mt-5 border-t border-border pt-4">
-          {playbookLoadFailed ? (
-            <p className="text-sm text-destructive">
-              对应客群营销指引加载失败，请稍后重试
-              {playbookErrorMessage ? `：${playbookErrorMessage}` : ""}
-            </p>
-          ) : matchedPlaybook ? (
-            <Link
-              to="/marketing/$id"
-              params={{ id: matchedPlaybook.id }}
-              className="inline-flex h-8 items-center rounded-sm border border-input bg-background px-3 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground"
-            >
-              查看对应客群营销指引
-            </Link>
-          ) : (
-            <p className="text-sm text-muted-foreground">对应客群营销指引待补充</p>
-          )}
-        </div>
+        {(playbookLoadFailed || !matchedPlaybook) && (
+          <div className="mt-5 border-t border-border pt-4">
+            {playbookLoadFailed ? (
+              <p className="text-sm text-destructive">
+                对应客群营销指引加载失败，请稍后重试
+                {playbookErrorMessage ? `：${playbookErrorMessage}` : ""}
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">对应客群营销指引待补充</p>
+            )}
+          </div>
+        )}
       </Section>
 
       <Section no="C" title="企业资质及竞争力点评">
@@ -276,22 +321,18 @@ function CompanyDetail() {
       </Section>
 
       <Section no="D" title="经营与财务概览">
-        {hasFinancialData(company) ? (
-          <div className="grid gap-px overflow-hidden bg-border sm:grid-cols-2 lg:grid-cols-3">
-            {FINANCIAL_KPI_FIELDS.map(({ key, label, suffix }) => (
-              <div key={key} className="bg-card p-4">
-                <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
-                  {label}
-                </div>
-                <div className="mt-2 text-lg font-semibold tracking-tight text-foreground">
-                  {formatKpiValue(company[key] as string | null, suffix)}
-                </div>
+        <div className="grid gap-px overflow-hidden bg-border sm:grid-cols-2 lg:grid-cols-3">
+          {FINANCIAL_KPI_FIELDS.map(({ key, label, suffix }) => (
+            <div key={key} className="bg-card p-4">
+              <div className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                {label}
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">财务数据待补充</p>
-        )}
+              <div className="mt-2 text-lg font-semibold tracking-tight text-foreground">
+                {formatKpiValue(company[key] as string | null, suffix)}
+              </div>
+            </div>
+          ))}
+        </div>
       </Section>
 
       <Section no="E" title="经营策略一览">
@@ -300,11 +341,33 @@ function CompanyDetail() {
             title="营销策略"
             content={company.marketing_strategy}
             placeholder="营销策略待生成：后续将基于该企业所属客群自动匹配客户经理营销手册。"
+            footer={
+              matchedPlaybook ? (
+                <Link
+                  to="/marketing/$id"
+                  params={{ id: matchedPlaybook.id }}
+                  className="inline-flex h-8 w-fit items-center rounded-sm border border-input bg-background px-3 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground"
+                >
+                  查看对应客群营销指引
+                </Link>
+              ) : undefined
+            }
           />
           <StrategyCard
             title="风控策略"
             content={company.risk_strategy}
-            placeholder="风控策略待生成：后续将基于该企业所属客群自动匹配信审评估框架。"
+            placeholder="风控策略待生成：后续将基于该企业所属客群自动匹配信审评估要点。"
+            footer={
+              matchedCreditStandard ? (
+                <Link
+                  to="/credit-standards/$id"
+                  params={{ id: matchedCreditStandard.id }}
+                  className="inline-flex h-8 w-fit items-center rounded-sm border border-input bg-background px-3 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground"
+                >
+                  查看对应客群信审评估要点
+                </Link>
+              ) : undefined
+            }
           />
           <StrategyCard
             title="产品推荐"
@@ -312,6 +375,21 @@ function CompanyDetail() {
             placeholder="产品推荐待生成：后续将基于该企业所属客群自动匹配产品服务策略。"
           />
         </div>
+
+        {matchedDueDiligenceCase && (
+          <div className="mt-4 rounded-sm border border-border bg-muted/20 px-4 py-4">
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              已沉淀该企业的历史尽调分析案例，可查看完整企业尽调分析报告。
+            </p>
+            <Link
+              to="/due-diligence-cases/$id"
+              params={{ id: matchedDueDiligenceCase.id }}
+              className="mt-3 inline-flex h-8 w-fit items-center rounded-sm border border-input bg-background px-3 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground"
+            >
+              查看该企业尽调实战案例
+            </Link>
+          </div>
+        )}
       </Section>
 
       <footer className="border-t border-border pt-4 text-xs leading-relaxed text-muted-foreground">

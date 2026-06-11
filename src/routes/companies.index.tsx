@@ -44,6 +44,12 @@ export const Route = createFileRoute("/companies/")({
 
 const ALL = "__all__";
 
+/** 横向滚动时固定「企业名称」列（背景须不透明，避免 hover 时其他列文字透出） */
+const frozenCompanyNameHeadClass =
+  "sticky left-0 z-30 min-w-[180px] bg-muted px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground shadow-[4px_0_6px_-4px_rgba(0,0,0,0.12)]";
+const frozenCompanyNameCellClass =
+  "sticky left-0 z-10 bg-card px-3 py-3 align-top shadow-[4px_0_6px_-4px_rgba(0,0,0,0.08)] group-hover:bg-[color-mix(in_oklch,var(--color-card)_70%,var(--color-muted)_30%)]";
+
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
     <Card className="rounded-sm border-border shadow-none">
@@ -253,10 +259,10 @@ function CompaniesPage() {
 
       <div className="border border-border bg-card">
         <div className="max-h-[min(520px,calc(100vh-22rem))] overflow-auto">
-          <table className="w-full caption-bottom text-sm">
+          <table className="w-full min-w-max caption-bottom text-sm">
             <TableHeader className="sticky top-0 z-10 bg-muted/95 backdrop-blur-sm [&_tr]:border-b">
               <TableRow className="border-b border-border bg-muted/40 hover:bg-muted/40">
-              <TableHead className="min-w-[180px] bg-muted/95 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+              <TableHead className={frozenCompanyNameHeadClass}>
                 企业名称
               </TableHead>
               <TableHead className="min-w-[120px] bg-muted/95 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -304,8 +310,11 @@ function CompaniesPage() {
             )}
             {!isLoading &&
               filtered.map((company) => (
-                <TableRow key={company.id} className="border-b border-border/70 hover:bg-muted/30">
-                  <TableCell className="px-3 py-3 align-top">
+                <TableRow
+                  key={company.id}
+                  className="group border-b border-border/70 hover:bg-transparent"
+                >
+                  <TableCell className={frozenCompanyNameCellClass}>
                     <Link
                       to="/companies/$id"
                       params={{ id: company.id }}
@@ -314,37 +323,37 @@ function CompaniesPage() {
                       {displayValue(company.company_name)}
                     </Link>
                   </TableCell>
-                  <TableCell className="px-3 py-3 align-top text-sm text-foreground">
+                  <TableCell className="px-3 py-3 align-top text-sm text-foreground group-hover:bg-muted/30">
                     {formatLocation(company.province, company.city)}
                   </TableCell>
-                  <TableCell className="px-3 py-3 align-top text-sm text-foreground">
+                  <TableCell className="px-3 py-3 align-top text-sm text-foreground group-hover:bg-muted/30">
                     {displayValue(company.sector_cat_i)}
                   </TableCell>
-                  <TableCell className="px-3 py-3 align-top text-sm text-foreground">
+                  <TableCell className="px-3 py-3 align-top text-sm text-foreground group-hover:bg-muted/30">
                     {displayValue(company.sector_cat_ii)}
                   </TableCell>
-                  <TableCell className="px-3 py-3 align-top text-sm text-foreground">
+                  <TableCell className="px-3 py-3 align-top text-sm text-foreground group-hover:bg-muted/30">
                     {displayValue(company.sector_cat_iii)}
                   </TableCell>
-                  <TableCell className="max-w-[220px] px-3 py-3 align-top text-sm text-muted-foreground">
+                  <TableCell className="max-w-[220px] px-3 py-3 align-top text-sm text-muted-foreground group-hover:bg-muted/30">
                     {displayValue(company.main_product)}
                   </TableCell>
-                  <TableCell className="px-3 py-3 align-top text-sm text-foreground">
+                  <TableCell className="px-3 py-3 align-top text-sm text-foreground group-hover:bg-muted/30">
                     {displayValue(company.credit_cat)}
                   </TableCell>
-                  <TableCell className="px-3 py-3 align-top text-sm text-foreground">
+                  <TableCell className="px-3 py-3 align-top text-sm text-foreground group-hover:bg-muted/30">
                     {formatListedStatus(company.listed_status, company.listed_code)}
                   </TableCell>
-                  <TableCell className="px-3 py-3 align-top">
+                  <TableCell className="px-3 py-3 align-top group-hover:bg-muted/30">
                     <QualificationTags company={company} />
                   </TableCell>
-                  <TableCell className="px-3 py-3 align-top text-sm text-foreground">
+                  <TableCell className="px-3 py-3 align-top text-sm text-foreground group-hover:bg-muted/30">
                     {displayValue(company.sector_attractiveness_status)}
                   </TableCell>
-                  <TableCell className="max-w-[220px] px-3 py-3 align-top text-sm text-muted-foreground">
+                  <TableCell className="max-w-[220px] px-3 py-3 align-top text-sm text-muted-foreground group-hover:bg-muted/30">
                     {displayValue(company.industry_specific_competitive_tag)}
                   </TableCell>
-                  <TableCell className="px-3 py-3 align-top">
+                  <TableCell className="px-3 py-3 align-top group-hover:bg-muted/30">
                     <Link
                       to="/companies/$id"
                       params={{ id: company.id }}
