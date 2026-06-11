@@ -15,6 +15,7 @@ import {
   isYes,
 } from "@/lib/companyDisplay";
 import { getCompanyById } from "@/services/companyService";
+import { getMarketingPlaybookBySector } from "@/services/marketingPlaybookService";
 import type { Company } from "@/types/company";
 
 export const Route = createFileRoute("/companies/$id")({
@@ -30,7 +31,19 @@ export const Route = createFileRoute("/companies/$id")({
   loader: async ({ params }) => {
     const result = await getCompanyById(params.id);
     if (!result.company) throw notFound();
-    return result;
+
+    const playbookResult = await getMarketingPlaybookBySector(
+      result.company.sector_cat_i,
+      result.company.sector_cat_ii,
+      result.company.sector_cat_iii,
+    );
+
+    return {
+      ...result,
+      matchedPlaybook: playbookResult.playbook,
+      playbookLoadFailed: playbookResult.loadFailed,
+      playbookErrorMessage: playbookResult.errorMessage,
+    };
   },
   pendingComponent: () => (
     <div className="px-8 py-10 text-sm text-muted-foreground">
@@ -158,7 +171,14 @@ function StrategyCard({
 }
 
 function CompanyDetail() {
-  const { company, loadFailed, errorMessage } = Route.useLoaderData();
+  const {
+    company,
+    loadFailed,
+    errorMessage,
+    matchedPlaybook,
+    playbookLoadFailed,
+    playbookErrorMessage,
+  } = Route.useLoaderData();
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-8 py-10">
@@ -215,6 +235,24 @@ function CompanyDetail() {
             label="赛道吸引力"
             value={displayValue(company.sector_attractiveness_status)}
           />
+        </div>
+        <div className="mt-5 border-t border-border pt-4">
+          {playbookLoadFailed ? (
+            <p className="text-sm text-destructive">
+              对应客群营销指引加载失败，请稍后重试
+              {playbookErrorMessage ? `：${playbookErrorMessage}` : ""}
+            </p>
+          ) : matchedPlaybook ? (
+            <Link
+              to="/marketing/$id"
+              params={{ id: matchedPlaybook.id }}
+              className="inline-flex h-8 items-center rounded-sm border border-input bg-background px-3 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground"
+            >
+              查看对应客群营销指引
+            </Link>
+          ) : (
+            <p className="text-sm text-muted-foreground">对应客群营销指引待补充</p>
+          )}
         </div>
       </Section>
 
