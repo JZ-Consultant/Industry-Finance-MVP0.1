@@ -19,15 +19,16 @@ import { Route as IndustryOverviewRouteImport } from './routes/industry-overview
 import { Route as IndustryRouteImport } from './routes/industry'
 import { Route as DueDiligenceTemplatesRouteImport } from './routes/due-diligence-templates'
 import { Route as DueDiligenceCasesRouteImport } from './routes/due-diligence-cases'
-import { Route as CreditStandardsRouteImport } from './routes/credit-standards'
 import { Route as CreditRouteImport } from './routes/credit'
 import { Route as AssistantRouteImport } from './routes/assistant'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketingIndexRouteImport } from './routes/marketing.index'
 import { Route as CustomerMarketingGuideIndexRouteImport } from './routes/customer-marketing-guide.index'
+import { Route as CreditStandardsIndexRouteImport } from './routes/credit-standards.index'
 import { Route as CompaniesIndexRouteImport } from './routes/companies.index'
 import { Route as MarketingIdRouteImport } from './routes/marketing.$id'
 import { Route as CustomerMarketingGuideIdRouteImport } from './routes/customer-marketing-guide.$id'
+import { Route as CreditStandardsIdRouteImport } from './routes/credit-standards.$id'
 import { Route as CompaniesIdRouteImport } from './routes/companies.$id'
 
 const TrainingRoute = TrainingRouteImport.update({
@@ -80,11 +81,6 @@ const DueDiligenceCasesRoute = DueDiligenceCasesRouteImport.update({
   path: '/due-diligence-cases',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CreditStandardsRoute = CreditStandardsRouteImport.update({
-  id: '/credit-standards',
-  path: '/credit-standards',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CreditRoute = CreditRouteImport.update({
   id: '/credit',
   path: '/credit',
@@ -111,6 +107,11 @@ const CustomerMarketingGuideIndexRoute =
     path: '/customer-marketing-guide/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const CreditStandardsIndexRoute = CreditStandardsIndexRouteImport.update({
+  id: '/credit-standards/',
+  path: '/credit-standards/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompaniesIndexRoute = CompaniesIndexRouteImport.update({
   id: '/companies/',
   path: '/companies/',
@@ -127,6 +128,11 @@ const CustomerMarketingGuideIdRoute =
     path: '/customer-marketing-guide/$id',
     getParentRoute: () => rootRouteImport,
   } as any)
+const CreditStandardsIdRoute = CreditStandardsIdRouteImport.update({
+  id: '/credit-standards/$id',
+  path: '/credit-standards/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompaniesIdRoute = CompaniesIdRouteImport.update({
   id: '/companies/$id',
   path: '/companies/$id',
@@ -137,7 +143,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/credit': typeof CreditRoute
-  '/credit-standards': typeof CreditStandardsRoute
   '/due-diligence-cases': typeof DueDiligenceCasesRoute
   '/due-diligence-templates': typeof DueDiligenceTemplatesRoute
   '/industry': typeof IndustryRoute
@@ -149,9 +154,11 @@ export interface FileRoutesByFullPath {
   '/regional-strategy': typeof RegionalStrategyRoute
   '/training': typeof TrainingRoute
   '/companies/$id': typeof CompaniesIdRoute
+  '/credit-standards/$id': typeof CreditStandardsIdRoute
   '/customer-marketing-guide/$id': typeof CustomerMarketingGuideIdRoute
   '/marketing/$id': typeof MarketingIdRoute
   '/companies/': typeof CompaniesIndexRoute
+  '/credit-standards/': typeof CreditStandardsIndexRoute
   '/customer-marketing-guide/': typeof CustomerMarketingGuideIndexRoute
   '/marketing/': typeof MarketingIndexRoute
 }
@@ -159,7 +166,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/credit': typeof CreditRoute
-  '/credit-standards': typeof CreditStandardsRoute
   '/due-diligence-cases': typeof DueDiligenceCasesRoute
   '/due-diligence-templates': typeof DueDiligenceTemplatesRoute
   '/industry': typeof IndustryRoute
@@ -171,9 +177,11 @@ export interface FileRoutesByTo {
   '/regional-strategy': typeof RegionalStrategyRoute
   '/training': typeof TrainingRoute
   '/companies/$id': typeof CompaniesIdRoute
+  '/credit-standards/$id': typeof CreditStandardsIdRoute
   '/customer-marketing-guide/$id': typeof CustomerMarketingGuideIdRoute
   '/marketing/$id': typeof MarketingIdRoute
   '/companies': typeof CompaniesIndexRoute
+  '/credit-standards': typeof CreditStandardsIndexRoute
   '/customer-marketing-guide': typeof CustomerMarketingGuideIndexRoute
   '/marketing': typeof MarketingIndexRoute
 }
@@ -182,7 +190,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/credit': typeof CreditRoute
-  '/credit-standards': typeof CreditStandardsRoute
   '/due-diligence-cases': typeof DueDiligenceCasesRoute
   '/due-diligence-templates': typeof DueDiligenceTemplatesRoute
   '/industry': typeof IndustryRoute
@@ -194,9 +201,11 @@ export interface FileRoutesById {
   '/regional-strategy': typeof RegionalStrategyRoute
   '/training': typeof TrainingRoute
   '/companies/$id': typeof CompaniesIdRoute
+  '/credit-standards/$id': typeof CreditStandardsIdRoute
   '/customer-marketing-guide/$id': typeof CustomerMarketingGuideIdRoute
   '/marketing/$id': typeof MarketingIdRoute
   '/companies/': typeof CompaniesIndexRoute
+  '/credit-standards/': typeof CreditStandardsIndexRoute
   '/customer-marketing-guide/': typeof CustomerMarketingGuideIndexRoute
   '/marketing/': typeof MarketingIndexRoute
 }
@@ -206,7 +215,6 @@ export interface FileRouteTypes {
     | '/'
     | '/assistant'
     | '/credit'
-    | '/credit-standards'
     | '/due-diligence-cases'
     | '/due-diligence-templates'
     | '/industry'
@@ -218,9 +226,11 @@ export interface FileRouteTypes {
     | '/regional-strategy'
     | '/training'
     | '/companies/$id'
+    | '/credit-standards/$id'
     | '/customer-marketing-guide/$id'
     | '/marketing/$id'
     | '/companies/'
+    | '/credit-standards/'
     | '/customer-marketing-guide/'
     | '/marketing/'
   fileRoutesByTo: FileRoutesByTo
@@ -228,7 +238,6 @@ export interface FileRouteTypes {
     | '/'
     | '/assistant'
     | '/credit'
-    | '/credit-standards'
     | '/due-diligence-cases'
     | '/due-diligence-templates'
     | '/industry'
@@ -240,9 +249,11 @@ export interface FileRouteTypes {
     | '/regional-strategy'
     | '/training'
     | '/companies/$id'
+    | '/credit-standards/$id'
     | '/customer-marketing-guide/$id'
     | '/marketing/$id'
     | '/companies'
+    | '/credit-standards'
     | '/customer-marketing-guide'
     | '/marketing'
   id:
@@ -250,7 +261,6 @@ export interface FileRouteTypes {
     | '/'
     | '/assistant'
     | '/credit'
-    | '/credit-standards'
     | '/due-diligence-cases'
     | '/due-diligence-templates'
     | '/industry'
@@ -262,9 +272,11 @@ export interface FileRouteTypes {
     | '/regional-strategy'
     | '/training'
     | '/companies/$id'
+    | '/credit-standards/$id'
     | '/customer-marketing-guide/$id'
     | '/marketing/$id'
     | '/companies/'
+    | '/credit-standards/'
     | '/customer-marketing-guide/'
     | '/marketing/'
   fileRoutesById: FileRoutesById
@@ -273,7 +285,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssistantRoute: typeof AssistantRoute
   CreditRoute: typeof CreditRoute
-  CreditStandardsRoute: typeof CreditStandardsRoute
   DueDiligenceCasesRoute: typeof DueDiligenceCasesRoute
   DueDiligenceTemplatesRoute: typeof DueDiligenceTemplatesRoute
   IndustryRoute: typeof IndustryRoute
@@ -285,9 +296,11 @@ export interface RootRouteChildren {
   RegionalStrategyRoute: typeof RegionalStrategyRoute
   TrainingRoute: typeof TrainingRoute
   CompaniesIdRoute: typeof CompaniesIdRoute
+  CreditStandardsIdRoute: typeof CreditStandardsIdRoute
   CustomerMarketingGuideIdRoute: typeof CustomerMarketingGuideIdRoute
   MarketingIdRoute: typeof MarketingIdRoute
   CompaniesIndexRoute: typeof CompaniesIndexRoute
+  CreditStandardsIndexRoute: typeof CreditStandardsIndexRoute
   CustomerMarketingGuideIndexRoute: typeof CustomerMarketingGuideIndexRoute
   MarketingIndexRoute: typeof MarketingIndexRoute
 }
@@ -364,13 +377,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DueDiligenceCasesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/credit-standards': {
-      id: '/credit-standards'
-      path: '/credit-standards'
-      fullPath: '/credit-standards'
-      preLoaderRoute: typeof CreditStandardsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/credit': {
       id: '/credit'
       path: '/credit'
@@ -406,6 +412,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerMarketingGuideIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/credit-standards/': {
+      id: '/credit-standards/'
+      path: '/credit-standards'
+      fullPath: '/credit-standards/'
+      preLoaderRoute: typeof CreditStandardsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/companies/': {
       id: '/companies/'
       path: '/companies'
@@ -427,6 +440,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomerMarketingGuideIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/credit-standards/$id': {
+      id: '/credit-standards/$id'
+      path: '/credit-standards/$id'
+      fullPath: '/credit-standards/$id'
+      preLoaderRoute: typeof CreditStandardsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/companies/$id': {
       id: '/companies/$id'
       path: '/companies/$id'
@@ -441,7 +461,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssistantRoute: AssistantRoute,
   CreditRoute: CreditRoute,
-  CreditStandardsRoute: CreditStandardsRoute,
   DueDiligenceCasesRoute: DueDiligenceCasesRoute,
   DueDiligenceTemplatesRoute: DueDiligenceTemplatesRoute,
   IndustryRoute: IndustryRoute,
@@ -453,9 +472,11 @@ const rootRouteChildren: RootRouteChildren = {
   RegionalStrategyRoute: RegionalStrategyRoute,
   TrainingRoute: TrainingRoute,
   CompaniesIdRoute: CompaniesIdRoute,
+  CreditStandardsIdRoute: CreditStandardsIdRoute,
   CustomerMarketingGuideIdRoute: CustomerMarketingGuideIdRoute,
   MarketingIdRoute: MarketingIdRoute,
   CompaniesIndexRoute: CompaniesIndexRoute,
+  CreditStandardsIndexRoute: CreditStandardsIndexRoute,
   CustomerMarketingGuideIndexRoute: CustomerMarketingGuideIndexRoute,
   MarketingIndexRoute: MarketingIndexRoute,
 }
